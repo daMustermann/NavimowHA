@@ -1,0 +1,46 @@
+{
+  "config": {
+    "step": {
+      "oauth2_authorize": {
+        "description": "Klikněte na „Potvrdit“, aby měl Home Assistant přístup k vašemu účtu Navimow.\n\nBudete přesměrováni na přihlašovací stránku Navimow pro dokončení ověření."
+      },
+      "user": {
+        "title": "Nastavení integrace Navimow",
+        "description": "Nastavení integrace robotické sekačky Navimow"
+      },
+      "reauth_confirm": {
+        "title": "Vyžadováno opětovné ověření",
+        "description": "Platnost vašeho přihlášení Navimow vypršela. Pro pokračování prosím proveďte nové ověření."
+      }
+    },
+    "error": {
+      "authorization_failed": "Autorizace selhala. Zkuste to prosím znovu.",
+      "token_exchange_failed": "Nepodařilo se vyměnit autorizační kód za token.",
+      "callback_failed": "Nepodařilo se zpracovat OAuth2 callback.",
+      "cannot_connect": "Nelze se připojit ke službě Navimow.",
+      "invalid_auth": "Ověření selhalo. Zkontrolujte prosím svou konfiguraci.",
+      "unknown": "Došlo k neznámé chybě.",
+      "missing_config": "Chybí konfigurace. Nastavte prosím CLIENT_ID a CLIENT_SECRET v const.py."
+    },
+    "abort": {
+      "single_instance_allowed": "Je povolena pouze jedna instance Navimow.",
+      "already_configured": "Navimow je již nastaven.",
+      "reauth_successful": "Opětovné ověření proběhlo úspěšně."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Možnosti Navimow",
+        "description": "Nastavení možností integrace Navimow"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "battery": {
+        "name": "Baterie"
+      }
+    }
+  }
+}
