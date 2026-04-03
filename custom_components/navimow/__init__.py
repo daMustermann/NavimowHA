@@ -165,7 +165,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "Bearer <masked>" if auth_headers else "<none>",
         )
 
-        def _attach_mqtt_debug_hooks(sdk: NavimowSDK) -> None:
+        def _attach_mqtt_debug_hooks(sdk: NavimowSDK, api: MowerAPI) -> None:
             mqtt = sdk._mqtt
             original_on_message = mqtt.on_message
             def _get_client_id() -> str:
@@ -201,6 +201,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     mqtt._use_tls,
                     _get_client_id(),
                 )
+                # 断连后重新从服务端拉取 MQTT 凭据（userName/pwdInfo 与 OAuth token 绑定，
+                # token 刷新或过期后凭据会失效，直接用旧凭据重连会导致 CODE_OAUTH_INFO_ILLEGAL）
+                await _async_refresh_mqtt_credentials(sdk, api)
 
             async def _on_message(topic: str, payload: bytes, device_id: str) -> None:
                 payload_text = (payload or b"").decode("utf-8", errors="replace")
@@ -241,7 +244,52 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             await asyncio.sleep(25)
             _LOGGER.info("MQTT status probe (30s): connected=%s", sdk.is_connected)
 
-        def _create_sdk() -> NavimowSDK:
+        async def _async_refresh_mqtt_credentials(sdk: NavimowSDK, api: MowerAPI) -> None:
+            """Token 过期或 MQTT 断连后，重新获取 MQTT 凭据并更新 SDK。
+
+            服务端下发的 userName/pwdInfo 与 OAuth token 绑定，token 刷新后需同步更新，
+            否则 MQTT 重连时会收到 CODE_OAUTH_INFO_ILLEGAL。
+
+            必须先刷新 OAuth token：MQTT 断连往往正是因为 token 过期触发的，
+            此时 api._token 极可能也已失效，需先换新 token 再拉取 MQTT 凭据。
+            """
+            try:
+                # 先刷新 OAuth token（oauth_session 来自外层闭包）
+                if hasattr(oauth_session, "async_ensure_token_valid"):
+                    await oauth_session.async_ensure_token_valid()
+                    fresh_token = oauth_session.token
+                elif hasattr(oauth_session, "async_get_valid_token"):
+                    fresh_token = await oauth_session.async_get_valid_token()
+                else:
+                    fresh_token = oauth_session.token
+
+                if fresh_token and fresh_token.get("access_token"):
+                    new_access_token = fresh_token["access_token"]
+                    api.set_token(new_access_token)
+                    sdk.update_mqtt_credentials(
+                        auth_headers={"Authorization": f"Bearer {new_access_token}"}
+                    )
+            except Exception as err:
+                _LOGGER.warning("Failed to refresh OAuth token before MQTT credential refresh: %s", err)
+
+            try:
+                new_mqtt_info = await api.async_get_mqtt_user_info()
+            except Exception as err:
+                _LOGGER.warning("Failed to refresh MQTT credentials: %s", err)
+                return
+            new_username = new_mqtt_info.get("userName")
+            new_password = new_mqtt_info.get("pwdInfo")
+            if new_username or new_password:
+                sdk.update_mqtt_credentials(
+                    username=new_username,
+                    password=new_password,
+                )
+                _LOGGER.info(
+                    "MQTT credentials refreshed from server: username=%s",
+                    _mask_secret(new_username),
+                )
+
+        def _create_sdk(api: MowerAPI) -> NavimowSDK:
             sdk = NavimowSDK(
                 broker=mqtt_host,
                 port=mqtt_port,
@@ -252,7 +300,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 loop=hass.loop,
                 records=devices,
             )
-            _attach_mqtt_debug_hooks(sdk)
             _LOGGER.info(
                 "Invoking SDK MQTT connect: broker=%s port=%s ws_path=%s",
                 mqtt_host,
@@ -262,7 +309,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             sdk.connect()
             return sdk
 
-        sdk = await hass.async_add_executor_job(_create_sdk)
+        sdk = await hass.async_add_executor_job(_create_sdk, api)
+        _attach_mqtt_debug_hooks(sdk, api)
         async_setup_services(hass, api)
         hass.async_create_task(_probe_mqtt_status(sdk))
 

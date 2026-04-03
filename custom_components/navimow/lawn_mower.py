@@ -118,13 +118,17 @@ class NavimowLawnMower(CoordinatorEntity[NavimowCoordinator], LawnMowerEntity):
             attributes["attributes"] = attrs.attributes
         return attributes
 
+    async def _async_send_command(self, command: MowerCommand, label: str) -> None:
+        """发送指令前先刷新 token，避免 token 过期导致 CODE_OAUTH_INFO_ILLEGAL。"""
+        await self.coordinator._async_ensure_valid_token()
+        await self._api.async_send_command(self._device_id, command)
+        _LOGGER.info("%s for device %s", label, self._device_id)
+        await self.coordinator.async_request_refresh()
+
     async def async_start_mowing(self) -> None:
         """Start mowing."""
         try:
-            await self._api.async_send_command(self._device_id, MowerCommand.START)
-            _LOGGER.info("Started mowing for device %s", self._device_id)
-            # 请求 coordinator 刷新以获取最新状态
-            await self.coordinator.async_request_refresh()
+            await self._async_send_command(MowerCommand.START, "Started mowing")
         except Exception as err:
             _LOGGER.error(
                 "Failed to start mowing for device %s: %s", self._device_id, err
@@ -134,10 +138,7 @@ class NavimowLawnMower(CoordinatorEntity[NavimowCoordinator], LawnMowerEntity):
     async def async_pause(self) -> None:
         """Pause mowing."""
         try:
-            await self._api.async_send_command(self._device_id, MowerCommand.PAUSE)
-            _LOGGER.info("Paused mowing for device %s", self._device_id)
-            # 请求 coordinator 刷新以获取最新状态
-            await self.coordinator.async_request_refresh()
+            await self._async_send_command(MowerCommand.PAUSE, "Paused mowing")
         except Exception as err:
             _LOGGER.error(
                 "Failed to pause mowing for device %s: %s", self._device_id, err
@@ -147,10 +148,7 @@ class NavimowLawnMower(CoordinatorEntity[NavimowCoordinator], LawnMowerEntity):
     async def async_dock(self) -> None:
         """Dock the mower."""
         try:
-            await self._api.async_send_command(self._device_id, MowerCommand.DOCK)
-            _LOGGER.info("Docked device %s", self._device_id)
-            # 请求 coordinator 刷新以获取最新状态
-            await self.coordinator.async_request_refresh()
+            await self._async_send_command(MowerCommand.DOCK, "Docked")
         except Exception as err:
             _LOGGER.error("Failed to dock device %s: %s", self._device_id, err)
             raise
@@ -158,10 +156,7 @@ class NavimowLawnMower(CoordinatorEntity[NavimowCoordinator], LawnMowerEntity):
     async def async_resume(self) -> None:
         """Resume mowing."""
         try:
-            await self._api.async_send_command(self._device_id, MowerCommand.RESUME)
-            _LOGGER.info("Resumed mowing for device %s", self._device_id)
-            # 请求 coordinator 刷新以获取最新状态
-            await self.coordinator.async_request_refresh()
+            await self._async_send_command(MowerCommand.RESUME, "Resumed mowing")
         except Exception as err:
             _LOGGER.error(
                 "Failed to resume mowing for device %s: %s", self._device_id, err

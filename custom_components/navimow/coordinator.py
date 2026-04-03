@@ -109,9 +109,21 @@ class NavimowCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             raise ConfigEntryAuthFailed("No access token after refresh")
         access_token = token["access_token"]
         self.api.set_token(access_token)
+        # 同步更新 MQTT WebSocket 认证头，避免 token 过期后重连失败（CODE_OAUTH_INFO_ILLEGAL）
+        self.sdk.update_mqtt_credentials(
+            auth_headers={"Authorization": f"Bearer {access_token}"}
+        )
         return access_token
 
     async def _async_update_data(self) -> dict[str, Any]:
+        # 每次 update 都主动刷新 token，确保 api._token 与 oauth_session 保持同步。
+        # 若仅在 HTTP fallback 时刷新，MQTT 正常推数据期间 token 长期不更新，
+        # 过期后用户下发指令会立即收到 CODE_OAUTH_INFO_ILLEGAL。
+        try:
+            await self._async_ensure_valid_token()
+        except ConfigEntryAuthFailed:
+            raise
+
         cached_state = self.sdk.get_cached_state(self.device.id)
         if cached_state is not None:
             self._last_state = cached_state
@@ -132,7 +144,6 @@ class NavimowCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         )
         if is_mqtt_stale and can_http_fetch:
             try:
-                await self._async_ensure_valid_token()
                 status = await self.api.async_get_device_status(self.device.id)
                 self._last_state = self._device_status_to_state(status)
                 self._last_http_fetch = now
