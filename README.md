@@ -8,8 +8,6 @@ Monitor and control Navimow robotic mowers in Home Assistant.
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=segwaynavimow&repository=NavimowHA&category=Integration)
 
-⚠️ **Please note:** This integration is still a work in progress. You may encounter unfinished features or bugs. If you run into any issues, please open an issue on the GitHub repository.
-
 ## Features ✨
 
 ### Mower Control

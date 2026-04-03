@@ -1,0 +1,46 @@
+{
+  "config": {
+    "step": {
+      "oauth2_authorize": {
+        "description": "Klicken Sie auf „Bestätigen“, um Home Assistant den Zugriff auf Ihr Navimow-Konto zu autorisieren.\n\nSie werden zur Navimow-Anmeldeseite weitergeleitet, um die Authentifizierung abzuschließen."
+      },
+      "user": {
+        "title": "Navimow Integration Konfiguration",
+        "description": "Konfiguriere Navimow Rasenmäher Integration"
+      },
+      "reauth_confirm": {
+        "title": "Erneute Authentifizierung erforderlich",
+        "description": "Ihre Navimow-Authentifizierung ist abgelaufen. Bitte authentifizieren Sie sich erneut, um die Integration weiterhin zu nutzen."
+      }
+    },
+    "error": {
+      "authorization_failed": "Autorisierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "token_exchange_failed": "Fehler beim Austausch des Autorisierungscodes gegen ein Token.",
+      "callback_failed": "Fehler bei der Verarbeitung des OAuth2-Callbacks.",
+      "cannot_connect": "Verbindung zum Navimow-Dienst nicht möglich.",
+      "invalid_auth": "Authentifizierung fehlgeschlagen. Bitte überprüfen Sie Ihre Konfiguration.",
+      "unknown": "Ein unbekannter Fehler ist aufgetreten.",
+      "missing_config": "Konfiguration fehlt. Bitte konfigurieren Sie CLIENT_ID und CLIENT_SECRET in der Datei const.py."
+    },
+    "abort": {
+      "single_instance_allowed": "Nur eine Navimow-Instanz ist zulässig.",
+      "already_configured": "Navimow ist bereits konfiguriert.",
+      "reauth_successful": "Erneute Authentifizierung erfolgreich."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Navimow Optionen",
+        "description": "Optionen der Navimow-Integration konfigurieren."
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "battery": {
+        "name": "Akku"
+      }
+    }
+  }
+}

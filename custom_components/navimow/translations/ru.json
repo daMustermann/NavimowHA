@@ -1,0 +1,46 @@
+{
+  "config": {
+    "step": {
+      "oauth2_authorize": {
+        "description": "Нажмите «Подтвердить», чтобы разрешить Home Assistant доступ к вашей учетной записи Navimow.\n\nВы будете перенаправлены на страницу входа Navimow для завершения аутентификации."
+      },
+      "user": {
+        "title": "Настройка интеграции Navimow",
+        "description": "Настройка интеграции газонокосилки Navimow"
+      },
+      "reauth_confirm": {
+        "title": "Требуется повторная аутентификация",
+        "description": "Срок действия вашей аутентификации Navimow истек. Пожалуйста, выполните повторную аутентификацию, чтобы продолжить использование интеграции."
+      }
+    },
+    "error": {
+      "authorization_failed": "Ошибка авторизации. Пожалуйста, попробуйте снова.",
+      "token_exchange_failed": "Не удалось обменять код авторизации на токен.",
+      "callback_failed": "Не удалось обработать OAuth2 callback.",
+      "cannot_connect": "Не удалось подключиться к сервису Navimow.",
+      "invalid_auth": "Ошибка аутентификации. Пожалуйста, проверьте вашу конфигурацию.",
+      "unknown": "Произошла неизвестная ошибка.",
+      "missing_config": "Отсутствует конфигурация. Пожалуйста, укажите CLIENT_ID и CLIENT_SECRET в const.py."
+    },
+    "abort": {
+      "single_instance_allowed": "Разрешен только один экземпляр Navimow.",
+      "already_configured": "Navimow уже настроен.",
+      "reauth_successful": "Повторная аутентификация успешно выполнена."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Параметры Navimow",
+        "description": "Настройка параметров интеграции Navimow"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "battery": {
+        "name": "Батарея"
+      }
+    }
+  }
+}

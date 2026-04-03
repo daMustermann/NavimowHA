@@ -1,0 +1,46 @@
+{
+  "config": {
+    "step": {
+      "oauth2_authorize": {
+        "description": "Fai clic su \"Conferma\" per autorizzare Home Assistant ad accedere al tuo account Navimow.\n\nVerrai reindirizzato alla pagina di accesso Navimow per completare l'autenticazione."
+      },
+      "user": {
+        "title": "Configurazione integrazione Navimow",
+        "description": "Configura l'integrazione del rasaerba Navimow"
+      },
+      "reauth_confirm": {
+        "title": "Autenticazione richiesta",
+        "description": "L'autenticazione Navimow è scaduta. Effettua nuovamente l'accesso per continuare a utilizzare l'integrazione."
+      }
+    },
+    "error": {
+      "authorization_failed": "Autorizzazione non riuscita. Riprova.",
+      "token_exchange_failed": "Impossibile scambiare il codice di autorizzazione con il token.",
+      "callback_failed": "Errore durante l'elaborazione della chiamata OAuth2.",
+      "cannot_connect": "Impossibile connettersi al servizio Navimow.",
+      "invalid_auth": "Autenticazione non riuscita. Verifica la configurazione.",
+      "unknown": "Si è verificato un errore sconosciuto.",
+      "missing_config": "Configurazione mancante. Configura CLIENT_ID e CLIENT_SECRET in const.py."
+    },
+    "abort": {
+      "single_instance_allowed": "È consentita una sola istanza di Navimow.",
+      "already_configured": "Navimow è già configurato.",
+      "reauth_successful": "Autenticazione completata con successo."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opzioni Navimow",
+        "description": "Configura le opzioni dell'integrazione Navimow"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "battery": {
+        "name": "Batteria"
+      }
+    }
+  }
+}

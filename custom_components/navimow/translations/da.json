@@ -1,0 +1,46 @@
+{
+  "config": {
+    "step": {
+      "oauth2_authorize": {
+        "description": "Klik på 'Bekræft' for at give Home Assistant adgang til din Navimow-konto.\n\nDu vil blive omdirigeret til Navimows login-side for at fuldføre autentificeringen."
+      },
+      "user": {
+        "title": "Konfiguration af Navimow-integration",
+        "description": "Konfigurer Navimow-plæneklipperintegration"
+      },
+      "reauth_confirm": {
+        "title": "Genautentificering påkrævet",
+        "description": "Din Navimow-autentificering er udløbet. Genautentificer venligst for at fortsætte med at bruge integrationen."
+      }
+    },
+    "error": {
+      "authorization_failed": "Autorisation mislykkedes. Prøv venligst igen.",
+      "token_exchange_failed": "Kunne ikke udveksle autorisationskode til et token.",
+      "callback_failed": "Kunne ikke behandle OAuth2-callback.",
+      "cannot_connect": "Kan ikke oprette forbindelse til Navimow-tjenesten.",
+      "invalid_auth": "Autentificering mislykkedes. Tjek venligst din konfiguration.",
+      "unknown": "Der opstod en ukendt fejl.",
+      "missing_config": "Manglende konfiguration. Angiv CLIENT_ID og CLIENT_SECRET i const.py."
+    },
+    "abort": {
+      "single_instance_allowed": "Kun én Navimow-instans er tilladt.",
+      "already_configured": "Navimow er allerede konfigureret.",
+      "reauth_successful": "Genautentificering lykkedes."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Navimow-indstillinger",
+        "description": "Konfigurer indstillinger for Navimow-integration"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "battery": {
+        "name": "Batteri"
+      }
+    }
+  }
+}
