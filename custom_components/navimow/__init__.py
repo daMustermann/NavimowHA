@@ -165,6 +165,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "Bearer <masked>" if auth_headers else "<none>",
         )
 
+        _mqtt_refresh_lock = asyncio.Lock()
+        # 用列表作为可变标志容器，使 async_unload_entry（不同函数作用域）可以修改它
+        _unload_flag: list[bool] = [False]
+
         def _attach_mqtt_debug_hooks(sdk: NavimowSDK, api: MowerAPI) -> None:
             mqtt = sdk._mqtt
             original_on_message = mqtt.on_message
@@ -201,9 +205,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     mqtt._use_tls,
                     _get_client_id(),
                 )
-                # 断连后重新从服务端拉取 MQTT 凭据（userName/pwdInfo 与 OAuth token 绑定，
-                # token 刷新或过期后凭据会失效，直接用旧凭据重连会导致 CODE_OAUTH_INFO_ILLEGAL）
-                await _async_refresh_mqtt_credentials(sdk, api)
+                if _unload_flag[0]:
+                    return
+                # 若已有刷新在进行中，跳过本次——broker 批量断连会并发触发多次回调，
+                # 只需执行一次凭据刷新即可，重复执行会导致 paho client 孤儿累积。
+                if _mqtt_refresh_lock.locked():
+                    _LOGGER.debug("MQTT credential refresh already in progress, skipping duplicate disconnect callback")
+                    return
+                async with _mqtt_refresh_lock:
+                    if _unload_flag[0]:
+                        return
+                    # 断连后重新从服务端拉取 MQTT 凭据（userName/pwdInfo 与 OAuth token 绑定，
+                    # token 刷新或过期后凭据会失效，直接用旧凭据重连会导致 CODE_OAUTH_INFO_ILLEGAL）
+                    await _async_refresh_mqtt_credentials(sdk, api)
 
             async def _on_message(topic: str, payload: bytes, device_id: str) -> None:
                 payload_text = (payload or b"").decode("utf-8", errors="replace")
@@ -347,6 +361,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "devices": devices,
             "coordinators": coordinators,
             "oauth_session": oauth_session,
+            "unload_flag": _unload_flag,
         }
 
         # 转发到平台
@@ -369,6 +384,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         # 清理数据
         if entry.entry_id in hass.data.get(DOMAIN, {}):
             data = hass.data[DOMAIN][entry.entry_id]
+            # 标记正在卸载，阻止断连回调触发新的凭据刷新
+            if "unload_flag" in data:
+                data["unload_flag"][0] = True
             sdk = data.get("sdk")
             if sdk:
                 try:
