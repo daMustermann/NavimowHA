@@ -1,5 +1,9 @@
 # NavimowHA Agent Instructions
 
+## Repo Location
+
+**Fork**: https://github.com/daMustermann/NavimowHA (original: segwaynavimow/NavimowHA)
+
 ## Repo Structure
 
 Single Home Assistant custom integration in `custom_components/navimow/`. No tests, no linting/typing config.
