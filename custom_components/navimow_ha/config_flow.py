@@ -5,7 +5,7 @@ from typing import Any
 
 from homeassistant import config_entries
 from homeassistant.core import callback
-from homeassistant.data_entry_flow import FlowResult
+from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.helpers import config_entry_oauth2_flow
 
 from .auth import NavimowOAuth2Implementation
@@ -57,7 +57,7 @@ class NavimowOAuth2FlowHandler(
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle a flow initiated by the user."""
         _LOGGER.debug("Starting OAuth2 flow: source=%s", self.source)
         # Ensure only a single integration instance is allowed.
@@ -85,7 +85,7 @@ class NavimowOAuth2FlowHandler(
 
     async def async_step_oauth2_authorize(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Ensure implementation exists before redirect."""
         _LOGGER.debug("Entering oauth2_authorize step")
         # Force register implementation in case HA missed it.
@@ -94,13 +94,13 @@ class NavimowOAuth2FlowHandler(
 
     async def async_step_reauth(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Perform reauth upon an API authentication error."""
         return await self.async_step_reauth_confirm()
 
     async def async_step_reauth_confirm(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Dialog that informs the user that reauth is required."""
         if user_input is None:
             return self.async_show_form(
@@ -111,7 +111,7 @@ class NavimowOAuth2FlowHandler(
         # Only one OAuth2 implementation - proceed directly to the authorize step.
         return await super().async_step_user()
 
-    async def async_oauth_create_entry(self, data: dict[str, Any]) -> FlowResult:
+    async def async_oauth_create_entry(self, data: dict[str, Any]) -> ConfigFlowResult:
         """Create or update the config entry after successful OAuth2 authorisation."""
         if self.source == config_entries.SOURCE_REAUTH:
             existing_entry = self.entry
@@ -156,7 +156,7 @@ class NavimowOptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Manage the options."""
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
