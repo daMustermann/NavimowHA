@@ -2,10 +2,8 @@
 from __future__ import annotations
 
 from homeassistant.components.device_tracker import (
-    TrackerSourceType,
-)
-from homeassistant.components.device_tracker.config_entry import (
-    BaseDeviceTracker,
+    SourceType,
+    TrackerEntity,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -38,7 +36,7 @@ async def async_setup_entry(
 
 
 class NavimowDeviceTracker(
-    CoordinatorEntity[NavimowCoordinator], BaseDeviceTracker
+    CoordinatorEntity[NavimowCoordinator], TrackerEntity
 ):
     """GPS tracker entity for a Navimow mower.
 
@@ -66,9 +64,9 @@ class NavimowDeviceTracker(
         )
 
     @property
-    def source_type(self) -> TrackerSourceType:
+    def source_type(self) -> SourceType:
         """Return the source type."""
-        return TrackerSourceType.GPS
+        return SourceType.GPS
 
     @property
     def available(self) -> bool:
