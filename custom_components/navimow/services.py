@@ -29,12 +29,14 @@ def async_setup_services(hass: HomeAssistant, _api: MowerAPI) -> None:
         device_id = call.data["device_id"]
         height = call.data["height"]
         _LOGGER.warning(
-            "Blade height change not supported via REST API (device %s, height %s)",
+            "Blade height change requested via service but REST API does not support it "
+            "(device %s, height %s). Use the number entity instead.",
             device_id,
             height,
         )
         raise HomeAssistantError(
-            "当前 REST API 不支持设置割草高度，服务未执行"
+            "Setting blade height via the REST API is not supported. "
+            "Use the 'Cutting Height' number entity instead."
         )
 
     hass.services.async_register(

@@ -1,17 +1,22 @@
 """Button platform for Navimow integration."""
 from __future__ import annotations
 
+import logging
+
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from mower_sdk.api import MowerAPI
 from mower_sdk.models import MowerCommand
 
 from .const import DOMAIN
 from .coordinator import NavimowCoordinator
+
+_LOGGER = logging.getLogger(__name__)
 
 BUTTON_DESCRIPTIONS: tuple[ButtonEntityDescription, ...] = (
     ButtonEntityDescription(
@@ -51,8 +56,8 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-class NavimowButton(ButtonEntity):
-    """Representation of a Navimow button."""
+class NavimowButton(CoordinatorEntity[NavimowCoordinator], ButtonEntity):
+    """Representation of a Navimow action button."""
 
     entity_description: ButtonEntityDescription
     _attr_has_entity_name = True
@@ -63,9 +68,8 @@ class NavimowButton(ButtonEntity):
         api: MowerAPI,
         entity_description: ButtonEntityDescription,
     ) -> None:
-        super().__init__()
-        self.coordinator = coordinator
-        self.api = api
+        super().__init__(coordinator)
+        self._api = api
         self.entity_description = entity_description
 
         device = coordinator.device
@@ -84,18 +88,23 @@ class NavimowButton(ButtonEntity):
         return self.coordinator.get_device_state() is not None
 
     async def async_press(self) -> None:
+        """Handle button press."""
         key = self.entity_description.key
-        if key == "locate":
-            await self._send_command(MowerCommand.LOCATE)
-        elif key == "restart":
-            await self._send_command(MowerCommand.RESTART)
+        command_map = {
+            "locate": MowerCommand.LOCATE,
+            "restart": MowerCommand.RESTART,
+        }
+        command = command_map.get(key)
+        if command is not None:
+            await self._send_command(command)
 
     async def _send_command(self, command: MowerCommand) -> None:
-        import logging
-        _LOGGER = logging.getLogger(__name__)
         await self.coordinator._async_ensure_valid_token()
         try:
-            await self.api.async_send_command(self.coordinator.device.id, command)
-            _LOGGER.info(f"Button pressed: {self.entity_description.key}")
+            await self._api.async_send_command(self.coordinator.device.id, command)
+            _LOGGER.info("Button pressed: %s", self.entity_description.key)
         except Exception as err:
-            _LOGGER.error(f"Failed to send command {self.entity_description.key}: {err}")
+            _LOGGER.error(
+                "Failed to send command %s: %s", self.entity_description.key, err
+            )
+            raise

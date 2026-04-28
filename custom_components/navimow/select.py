@@ -1,14 +1,21 @@
 """Select platform for Navimow integration."""
 from __future__ import annotations
 
+import logging
+
 from homeassistant.components.select import SelectEntity, SelectEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
+
+from mower_sdk.api import MowerAPI
 
 from .const import DOMAIN
 from .coordinator import NavimowCoordinator
+
+_LOGGER = logging.getLogger(__name__)
 
 CUTTING_HEIGHT_OPTIONS = [
     "25 mm",
@@ -41,6 +48,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up Navimow select entities from a config entry."""
     data = hass.data[DOMAIN][config_entry.entry_id]
+    api: MowerAPI = data["api"]
     devices = data["devices"]
     coordinators: dict[str, NavimowCoordinator] = data["coordinators"]
 
@@ -50,14 +58,15 @@ async def async_setup_entry(
             entities.append(
                 NavimowSelect(
                     coordinator=coordinators[device.id],
+                    api=api,
                     entity_description=description,
                 )
             )
     async_add_entities(entities)
 
 
-class NavimowSelect(SelectEntity):
-    """Representation of a Navimow select."""
+class NavimowSelect(CoordinatorEntity[NavimowCoordinator], SelectEntity):
+    """Representation of a Navimow select entity."""
 
     entity_description: SelectEntityDescription
     _attr_has_entity_name = True
@@ -65,10 +74,11 @@ class NavimowSelect(SelectEntity):
     def __init__(
         self,
         coordinator: NavimowCoordinator,
+        api: MowerAPI,
         entity_description: SelectEntityDescription,
     ) -> None:
-        super().__init__()
-        self.coordinator = coordinator
+        super().__init__(coordinator)
+        self._api = api
         self.entity_description = entity_description
 
         device = coordinator.device
@@ -99,3 +109,28 @@ class NavimowSelect(SelectEntity):
         if cutting_height is not None:
             return f"{cutting_height} mm"
         return None
+
+    async def async_select_option(self, option: str) -> None:
+        """Change the selected cutting height."""
+        # Parse the numeric value from the option string (e.g. "35 mm" -> 35)
+        try:
+            height_mm = int(option.split()[0])
+        except (ValueError, IndexError):
+            _LOGGER.error("Invalid cutting height option: %s", option)
+            return
+        await self.coordinator._async_ensure_valid_token()
+        try:
+            await self._api.async_set_device_attribute(
+                self.coordinator.device.id, "bladeHeight", height_mm
+            )
+            _LOGGER.info(
+                "Cutting height set to %d mm for device %s",
+                height_mm,
+                self.coordinator.device.id,
+            )
+            await self.coordinator.async_request_refresh()
+        except Exception as err:
+            _LOGGER.error(
+                "Failed to set cutting height to %d mm: %s", height_mm, err
+            )
+            raise

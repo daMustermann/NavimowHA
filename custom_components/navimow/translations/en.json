@@ -2,11 +2,11 @@
   "config": {
     "step": {
       "oauth2_authorize": {
-        "description": "Click 'Confirm' to authorize Home Assistant to access your Navimow account.\n\nYou will be redirected to the Navimow login page to complete authentication."
+        "description": "Click 'Confirm' to authorise Home Assistant to access your Navimow account.\n\nYou will be redirected to the Navimow login page to complete authentication."
       },
       "user": {
-        "title": "Navimow Integration Configuration",
-        "description": "Configure Navimow lawn mower integration"
+        "title": "Navimow Integration",
+        "description": "Set up your Navimow robotic lawn mower integration."
       },
       "reauth_confirm": {
         "title": "Re-authentication Required",
@@ -14,10 +14,10 @@
       }
     },
     "error": {
-      "authorization_failed": "Authorization failed. Please try again.",
-      "token_exchange_failed": "Failed to exchange authorization code for token.",
-      "callback_failed": "Failed to process OAuth2 callback.",
-      "cannot_connect": "Unable to connect to Navimow service.",
+      "authorization_failed": "Authorisation failed. Please try again.",
+      "token_exchange_failed": "Failed to exchange the authorisation code for a token.",
+      "callback_failed": "Failed to process the OAuth2 callback.",
+      "cannot_connect": "Unable to connect to the Navimow service.",
       "invalid_auth": "Authentication failed. Please check your configuration.",
       "unknown": "An unknown error occurred.",
       "missing_config": "Missing configuration. Please configure CLIENT_ID and CLIENT_SECRET in const.py."
@@ -32,7 +32,7 @@
     "step": {
       "init": {
         "title": "Navimow Options",
-        "description": "Configure Navimow integration options"
+        "description": "Configure Navimow integration options."
       }
     }
   },
@@ -43,7 +43,7 @@
       "status": { "name": "Status" },
       "position_x": { "name": "Position X" },
       "position_y": { "name": "Position Y" },
-      "position_theta": { "name": "Position Theta" },
+      "position_theta": { "name": "Heading" },
       "error_code": { "name": "Error Code" },
       "error_message": { "name": "Error Message" },
       "work_time": { "name": "Work Time" },
@@ -54,7 +54,23 @@
       "error": { "name": "Error" },
       "charging": { "name": "Charging" },
       "mowing": { "name": "Mowing" },
-      "docked": { "name": "Docked" }
+      "docked": { "name": "Docked" },
+      "returning": { "name": "Returning" }
+    },
+    "number": {
+      "cutting_height": { "name": "Cutting Height" }
+    },
+    "select": {
+      "cutting_height": { "name": "Cutting Height (Select)" }
+    },
+    "switch": {
+      "edge_mowing": { "name": "Edge Mowing" },
+      "rain_mode": { "name": "Rain Mode" },
+      "anti_theft": { "name": "Anti-Theft" }
+    },
+    "button": {
+      "locate": { "name": "Locate" },
+      "restart": { "name": "Restart" }
     }
   }
 }

@@ -1,6 +1,9 @@
 """Binary sensor platform for Navimow integration."""
 from __future__ import annotations
 
+from dataclasses import dataclass
+from typing import Any, Callable
+
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
     BinarySensorEntity,
@@ -16,35 +19,54 @@ from .const import DOMAIN
 from .coordinator import NavimowCoordinator
 
 
-BINARY_SENSOR_DESCRIPTIONS: tuple[BinarySensorEntityDescription, ...] = (
-    BinarySensorEntityDescription(
+@dataclass(frozen=True, kw_only=True)
+class NavimowBinarySensorEntityDescription(BinarySensorEntityDescription):
+    """Describes a Navimow binary sensor entity."""
+
+    value_fn: Callable[[NavimowCoordinator], bool | None] = lambda _: None
+
+
+BINARY_SENSOR_DESCRIPTIONS: tuple[NavimowBinarySensorEntityDescription, ...] = (
+    NavimowBinarySensorEntityDescription(
         key="error",
         translation_key="error",
         device_class=BinarySensorDeviceClass.PROBLEM,
         value_fn=lambda coordinator: (
-            (state := coordinator.get_device_state()) is not None and state.error is not None
+            (state := coordinator.get_device_state()) is not None
+            and state.error is not None
         ),
     ),
-    BinarySensorEntityDescription(
+    NavimowBinarySensorEntityDescription(
         key="charging",
         translation_key="charging",
         device_class=BinarySensorDeviceClass.BATTERY_CHARGING,
         value_fn=lambda coordinator: (
-            (state := coordinator.get_device_state()) is not None and state.state in ("charging", "docked")
+            (state := coordinator.get_device_state()) is not None
+            and state.state in ("charging", "docked")
         ),
     ),
-    BinarySensorEntityDescription(
+    NavimowBinarySensorEntityDescription(
         key="mowing",
         translation_key="mowing",
         value_fn=lambda coordinator: (
-            (state := coordinator.get_device_state()) is not None and state.state == "mowing"
+            (state := coordinator.get_device_state()) is not None
+            and state.state == "mowing"
         ),
     ),
-    BinarySensorEntityDescription(
+    NavimowBinarySensorEntityDescription(
         key="docked",
         translation_key="docked",
         value_fn=lambda coordinator: (
-            (state := coordinator.get_device_state()) is not None and state.state in ("docked", "charging")
+            (state := coordinator.get_device_state()) is not None
+            and state.state in ("docked", "charging")
+        ),
+    ),
+    NavimowBinarySensorEntityDescription(
+        key="returning",
+        translation_key="returning",
+        value_fn=lambda coordinator: (
+            (state := coordinator.get_device_state()) is not None
+            and state.state == "returning"
         ),
     ),
 )
@@ -76,13 +98,13 @@ async def async_setup_entry(
 class NavimowBinarySensor(CoordinatorEntity[NavimowCoordinator], BinarySensorEntity):
     """Representation of a Navimow binary sensor."""
 
-    entity_description: BinarySensorEntityDescription
+    entity_description: NavimowBinarySensorEntityDescription
     _attr_has_entity_name = True
 
     def __init__(
         self,
         coordinator: NavimowCoordinator,
-        entity_description: BinarySensorEntityDescription,
+        entity_description: NavimowBinarySensorEntityDescription,
     ) -> None:
         super().__init__(coordinator)
         self.entity_description = entity_description
@@ -106,5 +128,5 @@ class NavimowBinarySensor(CoordinatorEntity[NavimowCoordinator], BinarySensorEnt
 
     @property
     def is_on(self) -> bool | None:
-        """Return if the binary sensor is on."""
+        """Return True when the condition described by this sensor is active."""
         return self.entity_description.value_fn(self.coordinator)

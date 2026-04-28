@@ -54,10 +54,14 @@
       "error": { "name": "Fehler" },
       "charging": { "name": "Wird geladen" },
       "mowing": { "name": "Mäht" },
-      "docked": { "name": "An Station" }
+      "docked": { "name": "An Station" },
+      "returning": { "name": "Kehrt zurück" }
+    },
+    "number": {
+      "cutting_height": { "name": "Schnitthöhe" }
     },
     "select": {
-      "cutting_height": { "name": "Schnitthöhe" }
+      "cutting_height": { "name": "Schnitthöhe (Auswahl)" }
     },
     "switch": {
       "edge_mowing": { "name": "Kantenmähen" },

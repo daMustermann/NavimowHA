@@ -2,34 +2,75 @@
   "config": {
     "step": {
       "oauth2_authorize": {
-        "description": "请通过浏览器登录您的 Navimow 账户。\n\nPlease log in to your Navimow account via browser."
+        "description": "Click 'Confirm' to authorise Home Assistant to access your Navimow account.\n\nYou will be redirected to the Navimow login page to complete authentication."
       },
       "user": {
-        "title": "Navimow 集成配置",
-        "description": "配置 Navimow 割草机集成"
+        "title": "Navimow Integration",
+        "description": "Set up your Navimow robotic lawn mower integration."
+      },
+      "reauth_confirm": {
+        "title": "Re-authentication Required",
+        "description": "Your Navimow authentication has expired. Please re-authenticate to continue using the integration."
       }
     },
     "error": {
-      "authorization_failed": "授权失败，请重试",
-      "token_exchange_failed": "Token 交换失败",
-      "callback_failed": "回调处理失败",
-      "cannot_connect": "无法连接到 Navimow 服务",
-      "invalid_auth": "认证失败，请检查配置",
-      "unknown": "发生未知错误"
+      "authorization_failed": "Authorisation failed. Please try again.",
+      "token_exchange_failed": "Failed to exchange the authorisation code for a token.",
+      "callback_failed": "Failed to process the OAuth2 callback.",
+      "cannot_connect": "Unable to connect to the Navimow service.",
+      "invalid_auth": "Authentication failed. Please check your configuration.",
+      "unknown": "An unknown error occurred.",
+      "missing_config": "Missing configuration. Please configure CLIENT_ID and CLIENT_SECRET in const.py."
     },
     "abort": {
-      "single_instance_allowed": "只能添加一个 Navimow 实例",
-      "already_configured": "Navimow 已配置",
-      "reauth_successful": "重新认证成功",
-      "missing_config": "缺少 CLIENT_ID 或 CLIENT_SECRET，请在 const.py 中配置"
+      "single_instance_allowed": "Only one Navimow instance is allowed.",
+      "already_configured": "Navimow is already configured.",
+      "reauth_successful": "Re-authentication successful."
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "Navimow 选项",
-        "description": "配置 Navimow 集成选项"
+        "title": "Navimow Options",
+        "description": "Configure Navimow integration options."
       }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "battery": { "name": "Battery" },
+      "signal_strength": { "name": "Signal Strength" },
+      "status": { "name": "Status" },
+      "position_x": { "name": "Position X" },
+      "position_y": { "name": "Position Y" },
+      "position_theta": { "name": "Heading" },
+      "error_code": { "name": "Error Code" },
+      "error_message": { "name": "Error Message" },
+      "work_time": { "name": "Work Time" },
+      "work_area": { "name": "Work Area" },
+      "timestamp": { "name": "Last Update" }
+    },
+    "binary_sensor": {
+      "error": { "name": "Error" },
+      "charging": { "name": "Charging" },
+      "mowing": { "name": "Mowing" },
+      "docked": { "name": "Docked" },
+      "returning": { "name": "Returning" }
+    },
+    "number": {
+      "cutting_height": { "name": "Cutting Height" }
+    },
+    "select": {
+      "cutting_height": { "name": "Cutting Height (Select)" }
+    },
+    "switch": {
+      "edge_mowing": { "name": "Edge Mowing" },
+      "rain_mode": { "name": "Rain Mode" },
+      "anti_theft": { "name": "Anti-Theft" }
+    },
+    "button": {
+      "locate": { "name": "Locate" },
+      "restart": { "name": "Restart" }
     }
   }
 }

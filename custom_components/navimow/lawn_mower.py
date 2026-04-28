@@ -72,7 +72,7 @@ class NavimowLawnMower(CoordinatorEntity[NavimowCoordinator], LawnMowerEntity):
         self._device_name = device_name
         self._device_info = device_info
 
-        # 设置实体属性
+        # Set entity attributes
         self._attr_name = device_name
         self._attr_unique_id = f"{DOMAIN}_{device_id}"
         self._attr_device_info = DeviceInfo(
@@ -131,7 +131,7 @@ class NavimowLawnMower(CoordinatorEntity[NavimowCoordinator], LawnMowerEntity):
         return attributes
 
     async def _async_send_command(self, command: MowerCommand, label: str) -> None:
-        """发送指令前先刷新 token，避免 token 过期导致 CODE_OAUTH_INFO_ILLEGAL。"""
+        """Refresh the token, send a command to the mower, and trigger a state refresh."""
         await self.coordinator._async_ensure_valid_token()
         await self._api.async_send_command(self._device_id, command)
         _LOGGER.info("%s for device %s", label, self._device_id)
