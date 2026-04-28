@@ -15,6 +15,14 @@ This is a community fork of the [official integration](https://github.com/segway
 
 ---
 
+> **Using the official Navimow integration?**  
+> This fork uses the integration domain `navimow_ha` (folder: `custom_components/navimow_ha/`).  
+> It is fully independent of the official `navimow` integration and can be installed alongside it without conflict.  
+> If you are **migrating from the official integration**, remove the old integration entry from  
+> **Settings → Devices & Services** first, then add this one.
+
+---
+
 ## Features
 
 | Feature | Official | This Fork |
