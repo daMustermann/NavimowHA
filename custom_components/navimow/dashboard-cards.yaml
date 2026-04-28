@@ -1,0 +1,145 @@
+# Navimow Dashboard Cards - Ready to Use
+
+Simple copy-paste cards for Home Assistant dashboard.
+
+## Quick Add (5 cards)
+
+### Card 1: Battery Gauge
+```yaml
+type: gauge
+entity: sensor.YOUR_DEVICE_battery
+min: 0
+max: 100
+unit: '%'
+name: Battery
+```
+
+### Card 2: Status Card
+```yaml
+type: entities
+title: Status
+entities:
+  - entity: sensor.YOUR_DEVICE_status
+  - entity: binary_sensor.YOUR_DEVICE_mowing
+  - entity: binary_sensor.YOUR_DEVICE_charging
+  - type: divider
+  - entity: sensor.YOUR_DEVICE_signal_strength
+```
+
+### Card 3: Position Map
+```yaml
+type: map
+title: Position
+default_zoom: 19
+entities:
+  - entity: device_tracker.YOUR_DEVICE_location
+```
+
+### Card 4: Controls
+```yaml
+type: entities
+title: Controls
+entities:
+  - entity: select.YOUR_DEVICE_cutting_height
+  - entity: switch.YOUR_DEVICE_edge_mowing
+  - entity: switch.YOUR_DEVICE_rain_mode
+  - entity: switch.YOUR_DEVICE_anti_theft
+  - type: divider
+  - entity: button.YOUR_DEVICE_locate
+  - entity: button.YOUR_DEVICE_restart
+```
+
+### Card 5: Work Stats
+```yaml
+type: entities
+title: Statistics
+entities:
+  - entity: sensor.YOUR_DEVICE_work_time
+  - entity: sensor.YOUR_DEVICE_work_area
+  - entity: sensor.YOUR_DEVICE_position_x
+  - entity: sensor.YOUR_DEVICE_position_y
+```
+
+---
+
+## Easy Complete Dashboard
+
+Create a dashboard with these 5 cards:
+
+1. **Battery Gauge** - Top left
+2. **Status Card** - Top right
+3. **Position Map** - Middle (full width)
+4. **Controls** - Bottom left
+5. **Work Stats** - Bottom right
+
+---
+
+## Entity IDs
+
+Replace `YOUR_DEVICE` with your actual device ID:
+
+| Entity Type | Entity ID |
+|------------|-----------|
+| Lawn Mower | `lawn_mower.navimow_xxxxx` |
+| Battery | `sensor.navimow_xxxxx_battery` |
+| Status | `sensor.navimow_xxxxx_status` |
+| Signal | `sensor.navimow_xxxxx_signal_strength` |
+| Position X | `sensor.navimow_xxxxx_position_x` |
+| Position Y | `sensor.navimow_xxxxx_position_y` |
+| Work Time | `sensor.navimow_xxxxx_work_time` |
+| Work Area | `sensor.navimow_xxxxx_work_area` |
+| Mowing | `binary_sensor.navimow_xxxxx_mowing` |
+| Charging | `binary_sensor.navimow_xxxxx_charging` |
+| Docked | `binary_sensor.navimow_xxxxx_docked` |
+| Error | `binary_sensor.navimow_xxxxx_error` |
+| Cutting Height | `select.navimow_xxxxx_cutting_height` |
+| Edge Mowing | `switch.navimow_xxxxx_edge_mowing` |
+| Rain Mode | `switch.navimow_xxxxx_rain_mode` |
+| Anti-Theft | `switch.navimow_xxxxx_anti_theft` |
+| Locate | `button.navimow_xxxxx_locate` |
+| Restart | `button.navimow_xxxxx_restart` |
+| Location | `device_tracker.navimow_xxxxx_location` |
+
+---
+
+## HACS Cards (Optional)
+
+For better cards, install from HACS:
+
+1. **Card Mod** - For card styling
+2. **Mini Graph Card** - For history graphs
+3. **Map Card** - For better map (if not built-in)
+
+### Mini Graph Example
+```yaml
+type: custom:mini-graph-card
+entity: sensor.navimow_xxxxx_battery
+name: Battery History
+hours_to_show: 24
+points_per_hour: 4
+```
+
+---
+
+## One-Click Card (With Plugins)
+
+If you have HACS plugins installed:
+
+```yaml
+type: custom:stack-in-card
+title: Navimow Dashboard
+cards:
+  - type: gauge
+    entity: sensor.YOUR_DEVICE_battery
+    min: 0
+    max: 100
+    unit: '%'
+  - type: entities
+    entities:
+      - entity: lawn_mower.navimow
+      - entity: sensor.YOUR_DEVICE_status
+  - type: map
+    default_zoom: 18
+    entities:
+      - entity: device_tracker.YOUR_DEVICE_location
+```

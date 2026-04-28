@@ -38,9 +38,35 @@
   },
   "entity": {
     "sensor": {
-      "battery": {
-        "name": "Akkumulátor"
-      }
+      "battery": { "name": "Akkumulátor" },
+      "signal_strength": { "name": "Jelerősség" },
+      "status": { "name": "Állapot" },
+      "position_x": { "name": "Pozíció X" },
+      "position_y": { "name": "Pozíció Y" },
+      "position_theta": { "name": "Szög" },
+      "error_code": { "name": "Hibakód" },
+      "error_message": { "name": "Hibaüzenet" },
+      "work_time": { "name": "Működési idő" },
+      "work_area": { "name": "Levágott terület" },
+      "timestamp": { "name": "Utolsó frissítés" }
+    },
+    "binary_sensor": {
+      "error": { "name": "Hiba" },
+      "charging": { "name": "Töltés" },
+      "mowing": { "name": "Fűnyírás" },
+      "docked": { "name": "Dokkolva" }
+    },
+    "select": {
+      "cutting_height": { "name": "Vágási magasság" }
+    },
+    "switch": {
+      "edge_mowing": { "name": "Szegélynýírás" },
+      "rain_mode": { "name": "Eső mód" },
+      "anti_theft": { "name": "Lopásvédelem" }
+    },
+    "button": {
+      "locate": { "name": "Keresés" },
+      "restart": { "name": "Újraindítás" }
     }
   }
 }

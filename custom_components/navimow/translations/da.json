@@ -38,9 +38,35 @@
   },
   "entity": {
     "sensor": {
-      "battery": {
-        "name": "Batteri"
-      }
+      "battery": { "name": "Batteri" },
+      "signal_strength": { "name": "Signalstyrke" },
+      "status": { "name": "Status" },
+      "position_x": { "name": "Position X" },
+      "position_y": { "name": "Position Y" },
+      "position_theta": { "name": "Vinkel" },
+      "error_code": { "name": "Fejlkode" },
+      "error_message": { "name": "Fejlmeddelelse" },
+      "work_time": { "name": "Arbejdstid" },
+      "work_area": { "name": "Klippet område" },
+      "timestamp": { "name": "Sidste opdatering" }
+    },
+    "binary_sensor": {
+      "error": { "name": "Fejl" },
+      "charging": { "name": "Oplader" },
+      "mowing": { "name": "Klipper" },
+      "docked": { "name": "I ladestation" }
+    },
+    "select": {
+      "cutting_height": { "name": "Klippehøjde" }
+    },
+    "switch": {
+      "edge_mowing": { "name": "Kantklipning" },
+      "rain_mode": { "name": "Regntilstand" },
+      "anti_theft": { "name": "Tyverisikring" }
+    },
+    "button": {
+      "locate": { "name": "Find" },
+      "restart": { "name": "Genstart" }
     }
   }
 }

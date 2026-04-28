@@ -1,0 +1,183 @@
+# Home Assistant Dashboard Cards
+# Copy these card configurations into your HA Dashboard (YAML mode)
+
+# ============================================================
+# CARD 1: Mower Control Card (Main Control)
+# ============================================================
+type: custom:card-modder
+card:
+  type: entities
+  title: Navimow Mower
+  show_header_toggle: false
+  entities:
+    - entity: lawn_mower.naviomw
+      name: Mower
+    - entity: sensor.navimow_battery
+    - entity: sensor.navimow_status
+    - entity: binary_sensor.navimow_mowing
+    - entity: binary_sensor.navimow_charging
+    - entity: binary_sensor.navimow_docked
+
+# ============================================================
+# CARD 2: Mower Status Card (Sensors)
+# ============================================================
+type: custom:card-modder
+card:
+  type: entities
+  title: Mower Status
+  entities:
+    - entity: sensor.navimow_status
+      icon: mdi:robot
+    - entity: sensor.navimow_battery
+      icon: mdi:battery
+    - entity: sensor.navimow_signal_strength
+      icon: mdi:wifi
+    - entity: sensor.navimow_work_time
+      icon: mdi:clock
+    - entity: sensor.navimow_work_area
+      icon: mdi:grass
+
+# ============================================================
+# CARD 3: Position Card (Map + Position)
+# ============================================================
+type: custom:card-modder
+card:
+  type: map
+  title: Mower Position
+  default_zoom: 18
+  entities:
+    - entity: device_tracker.navimow_location
+      label: Mower
+
+# ============================================================
+# CARD 4: Mower Controls (Switches + Select)
+# ============================================================
+type: entities
+title: Mower Controls
+show_header_toggle: false
+entities:
+  - entity: select.navimow_cutting_height
+    icon: mdi:grass
+  - entity: switch.navimow_edge_mowing
+    icon: mdi:format-section
+  - entity: switch.navimow_rain_mode
+    icon: mdi:weather-rainy
+  - entity: switch.navimow_anti_theft
+    icon: mdi:shield-lock
+  - type: section
+  - entity: button.navimow_locate
+    icon: mdi:map-marker
+  - entity: button.navimow_restart
+    icon: mdi:restart
+
+# ============================================================
+# CARD 5: Position Sensors
+# ============================================================
+type: grid
+title: Mower Position
+square: false
+columns: 2
+cards:
+  - type: statistic
+    entity: sensor.navimow_position_x
+    name: X
+    icon: mdi:map-marker
+  - type: statistic
+    entity: sensor.navimow_position_y
+    name: Y
+    icon: mdi:map-marker
+  - type: statistic
+    entity: sensor.navimow_position_theta
+    name: Theta
+    icon: mdi:angle-acute
+  - type: gauge
+    entity: sensor.navimow_signal_strength
+    name: Signal
+    icon: mdi:wifi
+    min: 0
+    max: 100
+
+# ============================================================
+# CARD 6: Error Monitoring
+# ============================================================
+type: entities
+title: Mower Health
+entities:
+  - entity: binary_sensor.navimow_error
+    name: Error
+    icon: mdi:alert
+  - entity: sensor.navimow_error_code
+    name: Error Code
+    icon: mdi:alert-circle
+  - entity: sensor.navimow_error_message
+    name: Error Message
+    icon: mdi:alert-circle-outline
+
+# ============================================================
+# CARD 7: Complete Dashboard (All-in-One)
+# ============================================================
+type: custom:stack-in-card
+title: Navimow Dashboard
+cards:
+  - type: gauge
+    entity: sensor.navimow_battery
+    name: Battery
+    min: 0
+    max: 100
+    unit: '%'
+  - type: entities
+    entities:
+      - entity: lawn_mower.navimow
+      - entity: sensor.navimow_status
+      - entity: binary_sensor.navimow_mowing
+  - type: horizontal-stack
+    cards:
+      - type: button
+        entity: button.navimow_locate
+        name: Locate
+        icon: mdi:map-marker
+      - type: button
+        entity: button.navimow_restart
+        name: Restart
+        icon: mdi:restart
+
+# ============================================================
+# LOVELACE YAML EXAMPLE (full dashboard)
+# ============================================================
+views:
+  - title: Garden
+    cards:
+      - type: entities
+        title: Navimow Control
+        entities:
+          - entity: lawn_mower.navimow
+          - entity: sensor.navimow_battery
+          - entity: sensor.navimow_status
+          - type: divider
+          - entity: select.navimow_cutting_height
+          - type: horizontal-stack
+            cards:
+              - type: button
+                tap_action:
+                  action: call-service
+                  service: lawn_mower.start_mowing
+                  target:
+                    entity_id: lawn_mower.navimow
+                icon: mdi:play
+                title: Start
+              - type: button
+                tap_action:
+                  action: call-service
+                  service: lawn_mower.pause_mowing
+                  target:
+                    entity_id: lawn_mower.navimow
+                icon: mdi:pause
+                title: Pause
+              - type: button
+                tap_action:
+                  action: call-service
+                  service: lawn_mower.dock_mowing
+                  target:
+                    entity_id: lawn_mower.navimow
+                icon: mdi:home
+                title: Dock

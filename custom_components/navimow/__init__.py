@@ -27,7 +27,15 @@ from .services import async_setup_services
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.debug("Navimow module imported (__init__.py)")
 
-PLATFORMS: list[Platform] = [Platform.LAWN_MOWER, Platform.SENSOR]
+PLATFORMS: list[Platform] = [
+    Platform.LAWN_MOWER,
+    Platform.SENSOR,
+    Platform.DEVICE_TRACKER,
+    Platform.BINARY_SENSOR,
+    Platform.SELECT,
+    Platform.SWITCH,
+    Platform.BUTTON,
+]
 
 
 async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:

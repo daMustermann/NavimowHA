@@ -38,9 +38,35 @@
   },
   "entity": {
     "sensor": {
-      "battery": {
-        "name": "Batería"
-      }
+      "battery": { "name": "Batería" },
+      "signal_strength": { "name": "Intensidad de señal" },
+      "status": { "name": "Estado" },
+      "position_x": { "name": "Posición X" },
+      "position_y": { "name": "Posición Y" },
+      "position_theta": { "name": "Ángulo" },
+      "error_code": { "name": "Código de error" },
+      "error_message": { "name": "Mensaje de error" },
+      "work_time": { "name": "Tiempo de trabajo" },
+      "work_area": { "name": "Área cortada" },
+      "timestamp": { "name": "Última actualización" }
+    },
+    "binary_sensor": {
+      "error": { "name": "Error" },
+      "charging": { "name": "Cargando" },
+      "mowing": { "name": "Cortando" },
+      "docked": { "name": "En base" }
+    },
+    "select": {
+      "cutting_height": { "name": "Altura de corte" }
+    },
+    "switch": {
+      "edge_mowing": { "name": "Corte de bordes" },
+      "rain_mode": { "name": "Modo lluvia" },
+      "anti_theft": { "name": "Antirrobo" }
+    },
+    "button": {
+      "locate": { "name": "Localizar" },
+      "restart": { "name": "Reiniciar" }
     }
   }
 }

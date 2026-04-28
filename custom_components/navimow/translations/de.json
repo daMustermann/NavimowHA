@@ -38,9 +38,35 @@
   },
   "entity": {
     "sensor": {
-      "battery": {
-        "name": "Akku"
-      }
+      "battery": { "name": "Akku" },
+      "signal_strength": { "name": "Signalstärke" },
+      "status": { "name": "Status" },
+      "position_x": { "name": "Position X" },
+      "position_y": { "name": "Position Y" },
+      "position_theta": { "name": "Winkel" },
+      "error_code": { "name": "Fehlercode" },
+      "error_message": { "name": "Fehlermeldung" },
+      "work_time": { "name": "Arbeitszeit" },
+      "work_area": { "name": "Gemähte Fläche" },
+      "timestamp": { "name": "Letztes Update" }
+    },
+    "binary_sensor": {
+      "error": { "name": "Fehler" },
+      "charging": { "name": "Wird geladen" },
+      "mowing": { "name": "Mäht" },
+      "docked": { "name": "An Station" }
+    },
+    "select": {
+      "cutting_height": { "name": "Schnitthöhe" }
+    },
+    "switch": {
+      "edge_mowing": { "name": "Kantenmähen" },
+      "rain_mode": { "name": "Regenmodus" },
+      "anti_theft": { "name": "Diebstahlschutz" }
+    },
+    "button": {
+      "locate": { "name": "Lokalisieren" },
+      "restart": { "name": "Neustart" }
     }
   }
 }

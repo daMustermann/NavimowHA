@@ -38,9 +38,23 @@
   },
   "entity": {
     "sensor": {
-      "battery": {
-        "name": "Battery"
-      }
+      "battery": { "name": "Battery" },
+      "signal_strength": { "name": "Signal Strength" },
+      "status": { "name": "Status" },
+      "position_x": { "name": "Position X" },
+      "position_y": { "name": "Position Y" },
+      "position_theta": { "name": "Position Theta" },
+      "error_code": { "name": "Error Code" },
+      "error_message": { "name": "Error Message" },
+      "work_time": { "name": "Work Time" },
+      "work_area": { "name": "Work Area" },
+      "timestamp": { "name": "Last Update" }
+    },
+    "binary_sensor": {
+      "error": { "name": "Error" },
+      "charging": { "name": "Charging" },
+      "mowing": { "name": "Mowing" },
+      "docked": { "name": "Docked" }
     }
   }
 }

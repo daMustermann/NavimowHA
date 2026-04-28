@@ -38,9 +38,35 @@
   },
   "entity": {
     "sensor": {
-      "battery": {
-        "name": "Batterie"
-      }
+      "battery": { "name": "Batterie" },
+      "signal_strength": { "name": "Force du signal" },
+      "status": { "name": "Statut" },
+      "position_x": { "name": "Position X" },
+      "position_y": { "name": "Position Y" },
+      "position_theta": { "name": "Angle" },
+      "error_code": { "name": "Code erreur" },
+      "error_message": { "name": "Message d'erreur" },
+      "work_time": { "name": "Temps de travail" },
+      "work_area": { "name": "Surface tondue" },
+      "timestamp": { "name": "Dernière mise à jour" }
+    },
+    "binary_sensor": {
+      "error": { "name": "Erreur" },
+      "charging": { "name": "En charge" },
+      "mowing": { "name": "En cours de tonte" },
+      "docked": { "name": "Au dock" }
+    },
+    "select": {
+      "cutting_height": { "name": "Hauteur de coupe" }
+    },
+    "switch": {
+      "edge_mowing": { "name": "Taille des bordures" },
+      "rain_mode": { "name": "Mode pluie" },
+      "anti_theft": { "name": "Antivol" }
+    },
+    "button": {
+      "locate": { "name": "Localiser" },
+      "restart": { "name": "Redémarrer" }
     }
   }
 }

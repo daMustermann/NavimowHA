@@ -38,9 +38,35 @@
   },
   "entity": {
     "sensor": {
-      "battery": {
-        "name": "Baterie"
-      }
+      "battery": { "name": "Baterie" },
+      "signal_strength": { "name": "Síla signálu" },
+      "status": { "name": "Stav" },
+      "position_x": { "name": "Pozice X" },
+      "position_y": { "name": "Pozice Y" },
+      "position_theta": { "name": "Úhel" },
+      "error_code": { "name": "Kód chyby" },
+      "error_message": { "name": "Zpráva o chybě" },
+      "work_time": { "name": "Čas práce" },
+      "work_area": { "name": "Posečená plocha" },
+      "timestamp": { "name": "Poslední aktualizace" }
+    },
+    "binary_sensor": {
+      "error": { "name": "Chyba" },
+      "charging": { "name": "Nabíjení" },
+      "mowing": { "name": "Seká" },
+      "docked": { "name": "V dokovací stanici" }
+    },
+    "select": {
+      "cutting_height": { "name": "Výška sekání" }
+    },
+    "switch": {
+      "edge_mowing": { "name": "Sekání okrajů" },
+      "rain_mode": { "name": "Režim deště" },
+      "anti_theft": { "name": "Ochrana proti krádeži" }
+    },
+    "button": {
+      "locate": { "name": "Najít" },
+      "restart": { "name": "Restartovat" }
     }
   }
 }

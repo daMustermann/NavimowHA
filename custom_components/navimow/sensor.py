@@ -39,6 +39,86 @@ SENSOR_DESCRIPTIONS: tuple[NavimowSensorEntityDescription, ...] = (
             state.battery if (state := coordinator.get_device_state()) else None
         ),
     ),
+    NavimowSensorEntityDescription(
+        key="signal_strength",
+        translation_key="signal_strength",
+        device_class=SensorDeviceClass.SIGNAL_STRENGTH,
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda coordinator: (
+            state.signal_strength if (state := coordinator.get_device_state()) else None
+        ),
+    ),
+    NavimowSensorEntityDescription(
+        key="status",
+        translation_key="status",
+        value_fn=lambda coordinator: (
+            state.state if (state := coordinator.get_device_state()) else None
+        ),
+    ),
+    NavimowSensorEntityDescription(
+        key="position_x",
+        translation_key="position_x",
+        native_unit_of_measurement="m",
+        value_fn=lambda coordinator: (
+            state.position.get("postureX") if (state := coordinator.get_device_state()) and state.position else None
+        ),
+    ),
+    NavimowSensorEntityDescription(
+        key="position_y",
+        translation_key="position_y",
+        native_unit_of_measurement="m",
+        value_fn=lambda coordinator: (
+            state.position.get("postureY") if (state := coordinator.get_device_state()) and state.position else None
+        ),
+    ),
+    NavimowSensorEntityDescription(
+        key="position_theta",
+        translation_key="position_theta",
+        native_unit_of_measurement="rad",
+        value_fn=lambda coordinator: (
+            state.position.get("postureTheta") if (state := coordinator.get_device_state()) and state.position else None
+        ),
+    ),
+    NavimowSensorEntityDescription(
+        key="error_code",
+        translation_key="error_code",
+        value_fn=lambda coordinator: (
+            state.error.get("code") if (state := coordinator.get_device_state()) and state.error else None
+        ),
+    ),
+    NavimowSensorEntityDescription(
+        key="error_message",
+        translation_key="error_message",
+        value_fn=lambda coordinator: (
+            state.error.get("message") if (state := coordinator.get_device_state()) and state.error else None
+        ),
+    ),
+    NavimowSensorEntityDescription(
+        key="work_time",
+        translation_key="work_time",
+        native_unit_of_measurement="s",
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        value_fn=lambda coordinator: (
+            state.metrics.get("workTime") if (state := coordinator.get_device_state()) and state.metrics else None
+        ),
+    ),
+    NavimowSensorEntityDescription(
+        key="work_area",
+        translation_key="work_area",
+        native_unit_of_measurement="m²",
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        value_fn=lambda coordinator: (
+            state.metrics.get("workArea") if (state := coordinator.get_device_state()) and state.metrics else None
+        ),
+    ),
+    NavimowSensorEntityDescription(
+        key="timestamp",
+        translation_key="timestamp",
+        value_fn=lambda coordinator: (
+            state.timestamp if (state := coordinator.get_device_state()) else None
+        ),
+    ),
 )
 
 

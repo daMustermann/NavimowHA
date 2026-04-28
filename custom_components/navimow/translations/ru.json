@@ -38,9 +38,35 @@
   },
   "entity": {
     "sensor": {
-      "battery": {
-        "name": "Батарея"
-      }
+      "battery": { "name": "Батарея" },
+      "signal_strength": { "name": "Уровень сигнала" },
+      "status": { "name": "Статус" },
+      "position_x": { "name": "Позиция X" },
+      "position_y": { "name": "Позиция Y" },
+      "position_theta": { "name": "Угол" },
+      "error_code": { "name": "Код ошибки" },
+      "error_message": { "name": "Сообщение об ошибке" },
+      "work_time": { "name": "Время работы" },
+      "work_area": { "name": "Скошенная площадь" },
+      "timestamp": { "name": "Последнее обновление" }
+    },
+    "binary_sensor": {
+      "error": { "name": "Ошибка" },
+      "charging": { "name": "Зарядка" },
+      "mowing": { "name": "Косит" },
+      "docked": { "name": "На станции" }
+    },
+    "select": {
+      "cutting_height": { "name": "Высота стрижки" }
+    },
+    "switch": {
+      "edge_mowing": { "name": "Кромка" },
+      "rain_mode": { "name": "Дождь" },
+      "anti_theft": { "name": "Защита от кражи" }
+    },
+    "button": {
+      "locate": { "name": "Найти" },
+      "restart": { "name": "Перезагрузка" }
     }
   }
 }

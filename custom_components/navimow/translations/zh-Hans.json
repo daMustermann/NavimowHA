@@ -38,9 +38,35 @@
   },
   "entity": {
     "sensor": {
-      "battery": {
-        "name": "电池"
-      }
+      "battery": { "name": "电池" },
+      "signal_strength": { "name": "信号强度" },
+      "status": { "name": "状态" },
+      "position_x": { "name": "X坐标" },
+      "position_y": { "name": "Y坐标" },
+      "position_theta": { "name": "角度" },
+      "error_code": { "name": "错误代码" },
+      "error_message": { "name": "错误信息" },
+      "work_time": { "name": "工作时间" },
+      "work_area": { "name": "割草面积" },
+      "timestamp": { "name": "最后更新" }
+    },
+    "binary_sensor": {
+      "error": { "name": "错误" },
+      "charging": { "name": "充电中" },
+      "mowing": { "name": "割草中" },
+      "docked": { "name": "在充电座" }
+    },
+    "select": {
+      "cutting_height": { "name": "割草高度" }
+    },
+    "switch": {
+      "edge_mowing": { "name": "割边" },
+      "rain_mode": { "name": "雨天模式" },
+      "anti_theft": { "name": "防盗" }
+    },
+    "button": {
+      "locate": { "name": "定位" },
+      "restart": { "name": "重启" }
     }
   }
 }

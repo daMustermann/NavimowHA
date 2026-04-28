@@ -38,9 +38,35 @@
   },
   "entity": {
     "sensor": {
-      "battery": {
-        "name": "Accu"
-      }
+      "battery": { "name": "Accu" },
+      "signal_strength": { "name": "Signaalsterkte" },
+      "status": { "name": "Status" },
+      "position_x": { "name": "Positie X" },
+      "position_y": { "name": "Positie Y" },
+      "position_theta": { "name": "Hoek" },
+      "error_code": { "name": "Foutcode" },
+      "error_message": { "name": "Foutbericht" },
+      "work_time": { "name": "Werk tijd" },
+      "work_area": { "name": "Gemaaid gebied" },
+      "timestamp": { "name": "Laatste update" }
+    },
+    "binary_sensor": {
+      "error": { "name": "Fout" },
+      "charging": { "name": "Opladen" },
+      "mowing": { "name": "Maaiend" },
+      "docked": { "name": "In basis" }
+    },
+    "select": {
+      "cutting_height": { "name": "Snijhoogte" }
+    },
+    "switch": {
+      "edge_mowing": { "name": "Kantmaaien" },
+      "rain_mode": { "name": "Regenmodus" },
+      "anti_theft": { "name": "Diefstalbeveiliging" }
+    },
+    "button": {
+      "locate": { "name": "Zoeken" },
+      "restart": { "name": "Herstarten" }
     }
   }
 }
