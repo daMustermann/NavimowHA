@@ -1,6 +1,7 @@
 """The Navimow integration."""
 import asyncio
 import logging
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
@@ -53,7 +54,39 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
             CLIENT_SECRET,
         ),
     )
+
+    # Register the Lovelace custom card so it is available in the card picker
+    # without any manual resource configuration by the user.
+    await _async_register_lovelace_card(hass)
+
     return True
+
+
+async def _async_register_lovelace_card(hass: HomeAssistant) -> None:
+    """Serve navimow-card.js and register it as a Lovelace module."""
+    from homeassistant.components.http import StaticPathConfig
+
+    card_path = Path(__file__).parent / "www" / "navimow-card.js"
+    url = "/navimow_ha/navimow-card.js"
+
+    try:
+        await hass.http.async_register_static_paths(
+            [StaticPathConfig(url, str(card_path), cache_headers=True)]
+        )
+    except Exception as err:
+        _LOGGER.warning("Could not register navimow-card.js static path: %s", err)
+        return
+
+    try:
+        from homeassistant.components.frontend import add_extra_module_url
+        add_extra_module_url(hass, url)
+        _LOGGER.debug("Navimow Lovelace card registered: %s", url)
+    except ImportError:
+        _LOGGER.warning(
+            "Could not auto-register navimow-card.js as a Lovelace resource. "
+            "Add it manually: Settings → Dashboards → Resources → %s",
+            url,
+        )
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
