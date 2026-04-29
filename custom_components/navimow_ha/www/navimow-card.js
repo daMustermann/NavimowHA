@@ -292,6 +292,21 @@ class NavimowCard extends HTMLElement {
     this._hass?.callService(domain, service, data);
   }
 
+  // ── Entity auto-discovery ───────────────────────────────────────────────────
+  // Find an entity_id for the given domain whose suffix (after prefix_) matches
+  // any of the provided keywords. Handles any HA language since entity_id
+  // suffixes are derived from translated entity names.
+  _findEntityId(domain, keywords) {
+    const prefix = `${domain}.${this._cfg.entity_prefix}_`;
+    for (const eid of Object.keys(this._hass?.states || {})) {
+      if (eid.startsWith(prefix)) {
+        const suffix = eid.slice(prefix.length);
+        if (keywords.some(kw => suffix === kw || suffix.includes(kw))) return eid;
+      }
+    }
+    return null;
+  }
+
   // ── Render ──────────────────────────────────────────────────────────────────
   _render() {
     if (!this._cfg || !this._hass) return;
@@ -302,31 +317,47 @@ class NavimowCard extends HTMLElement {
       return;
     }
 
-    const status  = this._state('sensor', 'status') || this._state('lawn_mower', null) || 'unknown';
-    const battery = this._state('sensor', 'battery') || '0';
-    const signal  = this._state('sensor', 'signal_strength');
-    const posX    = this._state('sensor', 'position_x');
-    const posY    = this._state('sensor', 'position_y');
-    const posT    = this._state('sensor', 'position_theta');
-    const wTime   = this._state('sensor', 'work_time');
-    const wArea   = this._state('sensor', 'work_area');
-    const errOn   = this._state('binary_sensor', 'error') === 'on';
-    const errCode = this._state('sensor', 'error_code');
-    const errMsg  = this._state('sensor', 'error_message');
-    const edgeSw  = this._state('switch', 'edge_mowing');
-    const rainSw  = this._state('switch', 'rain_mode');
-    const theftSw = this._state('switch', 'anti_theft');
-    const height  = this._state('number', 'cutting_height');
+    // Read all mower data from the lawn_mower entity's extra_state_attributes.
+    // This is language-independent — entity_ids for individual sensors change
+    // depending on the HA instance language (e.g. 'battery' vs 'akku'), but
+    // the lawn_mower entity always exposes a fixed attribute structure.
+    const lm       = this._hass?.states[this._eid('lawn_mower', null)];
+    const mowerSt  = lm?.state || 'unknown';
+    const lmAttrs  = lm?.attributes || {};
+    const devAttrs = lmAttrs.attributes || {};
+    const pos      = lmAttrs.position   || null;
+    const error    = lmAttrs.error      || null;
+    const metrics  = lmAttrs.metrics    || null;
 
-    const haPos   = this._avail('sensor', 'position_x');
-    const mowerSt = this._state('lawn_mower', null) || status;
+    const battery  = lmAttrs.battery          ?? null;
+    const signal   = lmAttrs.signal_strength   ?? null;
+    const posX     = pos?.postureX             ?? null;
+    const posY     = pos?.postureY             ?? null;
+    const posT     = pos?.postureTheta         ?? null;
+    const errOn    = !!error;
+    const errCode  = error?.code               ?? null;
+    const errMsg   = error?.message            ?? null;
+    const wTime    = metrics?.workTime         ?? null;
+    const wArea    = metrics?.workArea         ?? null;
+
+    // Switch states come from the same attribute dict that individual switch
+    // entities read from, so they are always available here.
+    const edgeSw   = devAttrs.edge_mowing != null ? (devAttrs.edge_mowing ? 'on' : 'off') : null;
+    const rainSw   = devAttrs.rain_mode   != null ? (devAttrs.rain_mode   ? 'on' : 'off') : null;
+    const theftSw  = devAttrs.anti_theft  != null ? (devAttrs.anti_theft  ? 'on' : 'off') : null;
+
+    // Cutting height: auto-discover number entity (language-agnostic)
+    const heightEid = this._findEntityId('number', ['cutting_height', 'schnitthohe', 'height', 'schnitt']);
+    const height    = heightEid ? this._hass?.states[heightEid]?.state : null;
+
+    const haPos    = posX !== null && posX !== undefined;
 
     const mapStates = { x: posX, y: posY, theta: posT, status: mowerSt, battery };
     const mc = STATUS_COLOR[mowerSt] || '#78909C';
     const ml = STATUS_LABEL[mowerSt] || mowerSt.toUpperCase();
 
     const formatTime = (s) => {
-      if (!s || s === 'unavailable' || s === 'unknown') return '—';
+      if (s === null || s === undefined || s === 'unavailable' || s === 'unknown') return '—';
       const h = Math.floor(s/3600), m = Math.floor((s%3600)/60);
       return h > 0 ? `${h}h${m}m` : `${m}m`;
     };
@@ -381,7 +412,7 @@ class NavimowCard extends HTMLElement {
         <div class="stats">
           <div class="stat">
             <ha-icon class="stat-ico" icon="mdi:battery"></ha-icon>
-            <span class="stat-val">${battery !== 'unavailable' ? battery+'%' : '—'}</span>
+            <span class="stat-val">${battery !== null ? battery+'%' : '—'}</span>
             <span class="stat-lbl">Batterie</span>
           </div>
           <div class="stat">
@@ -391,7 +422,7 @@ class NavimowCard extends HTMLElement {
           </div>
           <div class="stat">
             <ha-icon class="stat-ico" icon="mdi:texture-box"></ha-icon>
-            <span class="stat-val">${wArea && wArea!=='unavailable' ? Math.round(wArea)+'m²' : '—'}</span>
+            <span class="stat-val">${wArea !== null ? Math.round(wArea)+'m²' : '—'}</span>
             <span class="stat-lbl">Fläche</span>
           </div>
         </div>` : ''}
@@ -408,7 +439,7 @@ class NavimowCard extends HTMLElement {
             </div>
             <div class="height-ctrl">
               <button class="height-btn" data-action="height-down">−</button>
-              <span class="height-val">${height && height!=='unavailable' ? Math.round(height)+' mm' : '—'}</span>
+              <span class="height-val">${height !== null && height !== undefined ? Math.round(height)+' mm' : '—'}</span>
               <button class="height-btn" data-action="height-up">+</button>
             </div>
           </div>
@@ -482,15 +513,24 @@ class NavimowCard extends HTMLElement {
         if (a === 'start')  this._svc('lawn_mower', 'start_mowing', { entity_id: lm });
         if (a === 'pause')  this._svc('lawn_mower', 'pause', { entity_id: lm });
         if (a === 'dock')   this._svc('lawn_mower', 'dock', { entity_id: lm });
-        if (a === 'locate') this._svc('button', 'press', { entity_id: this._eid('button', 'locate') });
-        if (a === 'restart') this._svc('button', 'press', { entity_id: this._eid('button', 'restart') });
+        if (a === 'locate') {
+          const bid = this._findEntityId('button', ['locate', 'lokalisieren', 'orten']);
+          if (bid) this._svc('button', 'press', { entity_id: bid });
+        }
+        if (a === 'restart') {
+          const bid = this._findEntityId('button', ['restart', 'neustart']);
+          if (bid) this._svc('button', 'press', { entity_id: bid });
+        }
 
         // Cutting height
         if (a === 'height-down' || a === 'height-up') {
-          const cur = parseFloat(this._state('number', 'cutting_height')) || 40;
-          const step = 5;
-          const next = a === 'height-up' ? Math.min(80, cur+step) : Math.max(25, cur-step);
-          this._svc('number', 'set_value', { entity_id: this._eid('number', 'cutting_height'), value: next });
+          const eid = this._findEntityId('number', ['cutting_height', 'schnitthohe', 'height', 'schnitt']);
+          if (eid) {
+            const cur = parseFloat(this._hass?.states[eid]?.state) || 40;
+            const step = 5;
+            const next = a === 'height-up' ? Math.min(80, cur+step) : Math.max(25, cur-step);
+            this._svc('number', 'set_value', { entity_id: eid, value: next });
+          }
         }
       });
     });
@@ -502,9 +542,18 @@ class NavimowCard extends HTMLElement {
         const on = e.detail?.value ?? e.target.checked;
         const svc = on ? 'turn_on' : 'turn_off';
 
-        if (a === 'toggle-edge')  this._svc('switch', svc, { entity_id: this._eid('switch', 'edge_mowing') });
-        if (a === 'toggle-rain')  this._svc('switch', svc, { entity_id: this._eid('switch', 'rain_mode') });
-        if (a === 'toggle-theft') this._svc('switch', svc, { entity_id: this._eid('switch', 'anti_theft') });
+        if (a === 'toggle-edge') {
+          const eid = this._findEntityId('switch', ['edge_mowing', 'kantenmahen', 'kantenmah', 'edge', 'kanten']);
+          if (eid) this._svc('switch', svc, { entity_id: eid });
+        }
+        if (a === 'toggle-rain') {
+          const eid = this._findEntityId('switch', ['rain_mode', 'regenmodus', 'regen', 'rain']);
+          if (eid) this._svc('switch', svc, { entity_id: eid });
+        }
+        if (a === 'toggle-theft') {
+          const eid = this._findEntityId('switch', ['anti_theft', 'diebstahlschutz', 'diebst', 'theft']);
+          if (eid) this._svc('switch', svc, { entity_id: eid });
+        }
       });
     });
   }
@@ -552,9 +601,9 @@ class NavimowCardEditor extends HTMLElement {
     const hint = document.createElement('div');
     hint.className = 'hint';
     hint.innerHTML = `
-      Gib den <b>Entitätspräfix</b> ein: der Teil vor dem ersten Suffix in deinen Sensor-IDs.<br>
-      Beispiel: <code>sensor.navimow_m550_battery</code> → Präfix: <code>navimow_m550</code><br>
-      <b>Tipp:</b> Entwicklerwerkzeuge → Zustände → nach <code>navimow</code> suchen.
+      Gib den <b>Entitätspräfix</b> ein: der Teil vor dem ersten Suffix in der Mäher-Entity-ID.<br>
+      Beispiel: <code>lawn_mower.navimow_m550</code> → Präfix: <code>navimow_m550</code><br>
+      <b>Tipp:</b> Entwicklerwerkzeuge → Zustände → nach <code>lawn_mower</code> suchen.
     `;
     this.shadowRoot.appendChild(hint);
 
