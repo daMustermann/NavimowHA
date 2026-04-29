@@ -23,6 +23,47 @@ This is a community fork of the [official integration](https://github.com/segway
 
 ---
 
+## 🚀 Schnellstart in 5 Minuten
+
+> Neu hier? Folge dieser Anleitung — von der Installation bis zur ersten Karte.
+
+### Schritt 1 — Integration installieren
+
+1. Öffne **HACS** → **Integrationen** → Menü oben rechts → **Benutzerdefinierte Repositories**
+2. URL eingeben: `https://github.com/daMustermann/NavimowHA` · Kategorie: **Integration** · **Hinzufügen**
+3. Suche nach **Navimow** in HACS und klicke **Herunterladen**
+4. **Home Assistant neu starten**
+
+### Schritt 2 — Integration einrichten
+
+1. **Einstellungen → Geräte & Dienste → Integration hinzufügen**
+2. Nach **Navimow** suchen und auswählen
+3. Auf **Bestätigen** klicken → Navimow-Login-Seite öffnet sich
+4. Mit deinem Navimow- / Segway-Konto anmelden
+5. HA erkennt deinen Mäher automatisch — fertig!
+
+> Kein API-Schlüssel nötig. Die Authentifizierung läuft über OAuth2.
+
+### Schritt 3 — Dashboard-Karte hinzufügen
+
+Die **Navimow-Karte** wird durch die Integration **automatisch registriert** — du brauchst keine zusätzliche HACS-Frontend-Installation.
+
+1. Öffne dein Dashboard → Stift-Symbol (Bearbeiten) → **Karte hinzufügen**
+2. Suche nach **Navimow** → **Navimow Mäher-Karte** auswählen
+3. Im Editor erscheint ein Formular:
+
+   **Entitätspräfix** — das ist der mittlere Teil deiner Sensor-IDs:
+   - Gehe zu **Entwicklerwerkzeuge → Zustände**
+   - Suche nach `navimow`
+   - Beispiel: `sensor.navimow_m550_battery` → Präfix ist **`navimow_m550`**
+   - Diesen Wert in das Feld eingeben
+
+4. **Speichern** — die Karte erscheint sofort mit Live-Karte und Steuerung
+
+Das war's! 🎉
+
+---
+
 ## Features
 
 | Feature | Official | This Fork |
