@@ -26,7 +26,7 @@ This is a community fork of the [official integration](https://github.com/segway
 ## Features
 
 | Feature | Official | This Fork |
-|---------|----------|-----------| 
+|---------|----------|-----------|
 | `lawn_mower` entity (start/pause/dock/resume) | ✅ | ✅ |
 | Battery sensor | ✅ | ✅ |
 | Status sensor | – | ✅ |
@@ -46,6 +46,8 @@ This is a community fork of the [official integration](https://github.com/segway
 | Real-time MQTT updates | – | ✅ |
 | Automatic token + MQTT credential refresh | – | ✅ |
 | HTTP fallback when MQTT is stale | – | ✅ |
+| **Custom Lovelace card** (auto-registered, GUI config) | – | ✅ |
+| **Live SVG map** with animated mower icon | – | ✅ |
 
 ---
 
@@ -70,7 +72,7 @@ This is a community fork of the [official integration](https://github.com/segway
 ### Manual
 
 1. Download the latest release from the [Releases page](https://github.com/daMustermann/NavimowHA/releases)
-2. Copy the `custom_components/navimow/` directory into your HA `custom_components/` folder
+2. Copy the `custom_components/navimow_ha/` directory into your HA `custom_components/` folder
 3. Restart Home Assistant
 4. Add the integration via **Settings** → **Devices & Services**
 
@@ -196,7 +198,7 @@ Extra attributes exposed:
 
 ```
 Home Assistant
-  └── Navimow Integration
+  └── Navimow Integration  (custom_components/navimow_ha/)
         ├── sensor.py          — 11 sensor entities
         ├── binary_sensor.py   — 5 binary sensors
         ├── number.py          — cutting height slider
@@ -205,9 +207,11 @@ Home Assistant
         ├── button.py          — locate + restart buttons
         ├── device_tracker.py  — position on HA map
         ├── lawn_mower.py      — main control entity
-        └── coordinator.py     — shared data + token refresh
-              ├── MQTT (primary)   — real-time push via WebSocket
-              └── REST API (fallback) — polled after 5 min silence
+        ├── coordinator.py     — shared data + token refresh
+        │     ├── MQTT (primary)   — real-time push via WebSocket
+        │     └── REST API (fallback) — polled after 5 min silence
+        └── www/
+              └── navimow-card.js — custom Lovelace card (auto-registered)
 ```
 
 ### Data Flow
@@ -286,9 +290,53 @@ automation:
 
 ## Dashboard Card
 
-See [CARDs.md](custom_components/navimow/CARDs.md) and
-[dashboard-cards.yaml](custom_components/navimow/dashboard-cards.yaml)
-for ready-to-use Lovelace card configurations.
+This integration includes a **custom Lovelace card** (`custom:navimow-card`) that is
+**automatically registered** when the integration starts — no manual resource setup needed.
+
+### Add the card
+
+1. Edit your dashboard → **Add Card** → search **Navimow**
+2. The **Navimow Mäher-Karte** appears in the card picker
+3. A GUI editor opens: enter the entity prefix and configure which sections to show
+
+**Minimal YAML** (if added manually):
+```yaml
+type: custom:navimow-card
+entity_prefix: navimow_m550   # prefix from sensor.navimow_m550_battery
+```
+
+### Card sections
+
+| Section | Content |
+|---------|---------|
+| Live map | Animated SVG — mower pulsates while mowing, blade rotates, direction arrow, battery bar |
+| Controls | Start / Pause / Return to base / Locate — highlight when active |
+| Statistics | Battery %, mowing time, mowed area |
+| Settings | Cutting height (±5 mm buttons), edge mowing, rain mode, anti-theft |
+| Error bar | Shows error code + message when a fault is active |
+
+### Config options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `entity_prefix` | *(required)* | e.g. `navimow_m550` |
+| `range` | `12` | Map radius in metres — adjust to your lawn size |
+| `show_map` | `true` | Show the live SVG map |
+| `show_controls` | `true` | Show control buttons |
+| `show_stats` | `true` | Show statistics row |
+| `show_settings` | `false` | Show settings panel |
+
+### Finding your entity prefix
+
+Go to **Developer Tools → States** and search for `navimow`.
+Take any sensor ID, e.g. `sensor.navimow_m550_battery` → prefix is `navimow_m550`.
+
+### Full dashboard YAML
+
+A complete multi-section Lovelace view (title + chips, map, gauge + mini graph,
+control buttons, settings, error card) is also available in
+[dashboard-cards.yaml](custom_components/navimow_ha/dashboard-cards.yaml).
+This version uses Mushroom Cards, Button Card and Mini Graph Card from HACS.
 
 ---
 
@@ -319,7 +367,7 @@ go unavailable:
 # configuration.yaml
 logger:
   logs:
-    custom_components.navimow: debug
+    custom_components.navimow_ha: debug
 ```
 
 ---
