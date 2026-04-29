@@ -1,53 +1,51 @@
-# Navimow Echtzeit Map - Super Einfach
+# Navimow Live-Karte
 
-## Eine Karte (Copy & Paste)
+## Koordinatensystem
 
-```yaml
+Die Position (X/Y) vom Navimow ist **lokal** in Metern ab der Ladestation — **kein GPS**.
+
+| Wert | Bedeutung |
+|------|-----------|
+| X | Ost (+) / West (-) in Metern |
+| Y | Nord (+) / Süd (-) in Metern |
+| θ (Theta) | Ausrichtung in Radiant |
+
+Ursprung (0, 0) = Ladestation.
+
+## SVG Live-Karte (in dashboard-cards.yaml)
+
+Die enthaltene SVG-Karte zeigt:
+- Ladestation als goldenen ⚡-Punkt in der Mitte
+- Mäher als farbigen Kreis mit Richtungspfeil
+- Pulsierende Animation während des Mähens
+- Rotierende Klinge während des Mähens
+- Batterie-Balken und Positionsanzeige direkt auf der Karte
+
+### RANGE anpassen
+
+In \dashboard-cards.yaml\ (ca. Zeile 80):
+
+\\\javascript
+const RANGE = 12;  // Radius in Metern
+\\\
+
+Wähle den Wert passend zu deinem Rasen:
+- Kleiner Rasen (< 100 m²): \RANGE = 6\
+- Mittlerer Rasen (~300 m²): \RANGE = 12\
+- Großer Rasen (> 500 m²): \RANGE = 20\
+
+## Echte GPS-Karte
+
+Falls der Mäher echte GPS-Koordinaten liefert (zukünftige SDK-Version),
+wird der Standard-HA-Kartentyp automatisch funktionieren:
+
+\\\yaml
 type: map
-title: Mäher Position
 entities:
-  - device_tracker.navimow_DEINE_ID_location
+  - device_tracker.navimow_[DEVICE_ID]_location
 default_zoom: 19
-```
+\\\
 
-Fertig!
-
----
-
-## So findest du DEINE_ID
-
-1. Home Assistant → **Entwicklerwerkzeuge** (unten links)
-2. Tab **Zustände**
-3. Suche `navimow`
-4. Z.B. `sensor.navimow_ABC123_battery` → **ID = ABC123**
-
----
-
-## Wichtig: Lokale Koordinaten
-
-Die Position ist **lokal** (innerhalb des Mähbereichs in Metern), NICHT GPS!
-
-- X = Position Ost-West (Meter)
-- Y = Position Nord-Süd (Meter)
-- Theta = Drehwinkel
-
-Für echte GPS-Karte auf Weltkarte brauchst du die Ladestation als Referenzpunkt.
-
----
-
-## Wenn Map-Karte nicht verfügbar
-
-**Option 1:** HACS installieren → Map Card suchen
-**Option 2:** Einfach Sensor-Karten nutzen:
-
-```yaml
-type: entities
-title: Position
-entities:
-  - sensor.navimow_DEINE_ID_position_x
-  - sensor.navimow_DEINE_ID_position_y
-```
-
----
-
-## Fertig! 🚜
+Aktuell meldet \device_tracker\ die lokalen X/Y-Werte als Lat/Lon — 
+dies platziert den Mäher zwar an einem willkürlichen Weltkartenort,
+ist aber für die native HA-Karte funktional (Bewegung ist sichtbar).

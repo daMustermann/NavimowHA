@@ -1,73 +1,54 @@
-# Navimow Cards - Simple Copy & Paste
+# Navimow Dashboard Cards
 
-## Quick Add (5 Minutes)
+Ein komplettes, visuell ansprechendes Lovelace-Dashboard für den Navimow Rasenmäher.
 
-### Card 1: Battery
-```yaml
-type: gauge
-entity: sensor.navimow_[DEVICE_ID]_battery
-min: 0
-max: 100
-unit: '%'
-```
+## Enthaltene Karten
 
-### Card 2: Status
-```yaml
-type: entities
-title: Status
-entities:
-  - sensor.navimow_[DEVICE_ID]_status
-  - sensor.navimow_[DEVICE_ID]_battery
-  - sensor.navimow_[DEVICE_ID]_signal_strength
-```
+| Karte | Beschreibung |
+|-------|-------------|
+| **Titel + Chips** | Status, Batterie, Signal auf einen Blick |
+| **SVG Live-Karte** | Animierter Mäher auf dunkel-grünem Rasenhintergrund |
+| **Batterie-Gauge** | Nadel-Anzeige + 24h Verlauf (Mini Graph) |
+| **Steuerung** | Mähen / Pause / Zurück / Orten — farblich aktiv |
+| **Einstellungen** | Schnitthöhe, Kantenmähen, Regenmodus, Diebstahlschutz |
+| **Statistiken** | Mähzeit, Fläche, Status, Signal |
+| **Fehlerkarte** | Pulsierend sichtbar, nur wenn Fehler aktiv |
 
-### Card 3: Map
-```yaml
-type: map
-entities:
-  - device_tracker.navimow_[DEVICE_ID]_location
-```
+## Voraussetzungen (HACS Frontend)
 
-### Card 4: Controls
-```yaml
-type: entities
-title: Controls
-entities:
-  - select.navimow_[DEVICE_ID]_cutting_height
-  - switch.navimow_[DEVICE_ID]_edge_mowing
-  - switch.navimow_[DEVICE_ID]_rain_mode
-  - button.navimow_[DEVICE_ID]_locate
-```
+Folgende Cards über **HACS → Frontend** installieren:
 
-### Card 5: Stats
-```yaml
-type: entities
-title: Stats
-entities:
-  - sensor.navimow_[DEVICE_ID]_work_time
-  - sensor.navimow_[DEVICE_ID]_work_area
-```
+| Card | HACS-Name |
+|------|-----------|
+| Mushroom Cards | \lovelace-mushroom\ |
+| Button Card | \lovelace-button-card\ |
+| Mini Graph Card | \mini-graph-card\ |
+| Card Mod | \lovelace-card-mod\ |
 
----
+## Installation
 
-## Find Your Device ID
+1. HACS-Cards installieren und HA neu laden  
+2. Geräte-ID herausfinden:  
+   **Entwicklerwerkzeuge → Zustände → "navimow" suchen**  
+   Beispiel: \sensor.navimow_m550_battery\ → ID = \m550\  
+3. In \dashboard-cards.yaml\ alle **\[DEVICE_ID]\** durch deine ID ersetzen  
+4. Dashboard → ⋮ → Dashboard bearbeiten → ＋ Ansicht → RAW-Editor  
+5. Gesamten Inhalt von \dashboard-cards.yaml\ einfügen → Speichern
 
-1. **HA → Developer Tools** (bottom left)
-2. **States** tab
-3. Search `navimow`
-4. Pick any sensor - the middle part = your ID
+## Live-Karte: RANGE anpassen
 
-Example: `sensor.navimow_ABC123456_battery` → **ID = ABC123456**
+Die Live-Karte nutzt **lokale Koordinaten** (Meter ab Ladestation, kein GPS).  
+Passe den \RANGE\-Wert (Zeile ~80 in \dashboard-cards.yaml\) auf den Radius deines Rasens an:
 
----
+\\\javascript
+const RANGE = 12;  // ← z.B. 8 für kleinen Rasen, 20 für großen Rasen
+\\\
 
-## Replace [DEVICE_ID] with Your ID
+## Darstellung der Live-Karte
 
-| Entity | Replace [DEVICE_ID] with |
-|--------|----------------------|
-| Battery | `ABC123456_battery` |
-| Status | `ABC123456_status` |
-| Map | `ABC123456_location` |
-| etc... | ... |
-
-That's it! 🎉
+- 🟡 **Goldener Punkt** = Ladestation (Koordinaten-Ursprung)
+- 🟢 **Grüner Kreis** = Mäher → pulsiert beim Mähen
+- **Weißes Dreieck** = Fahrtrichtung (basiert auf θ)
+- **Kreuzblatt** = rotiert beim Mähen animiert
+- **Batterie-Balken** oben rechts auf der Karte
+- **Status-Badge** unten auf der Karte
