@@ -1,14 +1,13 @@
 """Services for Navimow integration."""
 
 import logging
+from typing import Any
 
 import voluptuous as vol
 
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import config_validation as cv
-
-from mower_sdk.api import MowerAPI
 
 from .const import DOMAIN
 
@@ -24,7 +23,7 @@ SERVICE_SCHEMA_SET_BLADE_HEIGHT = vol.Schema(
 )
 
 
-def async_setup_services(hass: HomeAssistant, _api: MowerAPI) -> None:
+def async_setup_services(hass: HomeAssistant, _api: Any) -> None:
     async def _handle_set_blade_height(call: ServiceCall) -> None:
         device_id = call.data["device_id"]
         height = call.data["height"]
