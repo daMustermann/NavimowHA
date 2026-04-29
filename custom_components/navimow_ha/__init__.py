@@ -6,8 +6,8 @@ from typing import Any
 from urllib.parse import urlparse
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.const import EVENT_HOMEASSISTANT_STARTED, Platform
+from homeassistant.core import Event, HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.helpers import config_entry_oauth2_flow
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -63,30 +63,77 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
 
 
 async def _async_register_lovelace_card(hass: HomeAssistant) -> None:
-    """Serve navimow-card.js and register it as a Lovelace module."""
+    """Serve navimow-card.js and register it in the Lovelace resource storage.
+
+    Lovelace has two modes:
+    - Storage mode (default): resources must be in the Lovelace resource DB.
+    - YAML mode: add_extra_module_url works, but is not the default.
+    We handle both by registering in storage AND adding as extra module URL.
+    The storage registration is deferred until HA is fully started so that
+    the lovelace component data is guaranteed to be available.
+    """
     from homeassistant.components.http import StaticPathConfig
 
     card_path = Path(__file__).parent / "www" / "navimow-card.js"
     url = "/navimow_ha/navimow-card.js"
 
+    # Step 1: serve the static file (never bail out on error — path may already
+    # be registered from a previous load during the same HA session).
     try:
         await hass.http.async_register_static_paths(
-            [StaticPathConfig(url, str(card_path), cache_headers=True)]
+            [StaticPathConfig(url, str(card_path), cache_headers=False)]
         )
     except Exception as err:
-        _LOGGER.warning("Could not register navimow-card.js static path: %s", err)
-        return
+        _LOGGER.debug("navimow-card static path (may already be registered): %s", err)
 
+    # Step 2: also register via add_extra_module_url so YAML-mode dashboards
+    # and the global HA page pick up the module.
     try:
         from homeassistant.components.frontend import add_extra_module_url
         add_extra_module_url(hass, url)
-        _LOGGER.debug("Navimow Lovelace card registered: %s", url)
-    except ImportError:
-        _LOGGER.warning(
-            "Could not auto-register navimow-card.js as a Lovelace resource. "
-            "Add it manually: Settings → Dashboards → Resources → %s",
-            url,
-        )
+    except Exception as err:
+        _LOGGER.debug("navimow-card add_extra_module_url: %s", err)
+
+    # Step 3: register in the Lovelace resource storage.
+    # This is what the card picker reads in storage mode (the default).
+    # Lovelace is set up after async_setup returns, so we must wait for
+    # EVENT_HOMEASSISTANT_STARTED before touching hass.data["lovelace"].
+    async def _add_to_lovelace_storage(_event: Event | None = None) -> None:
+        try:
+            lovelace_data = hass.data.get("lovelace")
+            if not lovelace_data:
+                _LOGGER.warning(
+                    "navimow-card: Lovelace not found in hass.data. "
+                    "Add manually: Einstellungen → Dashboards → Ressourcen → %s (JavaScript-Modul)",
+                    url,
+                )
+                return
+            resources = lovelace_data.get("resources")
+            if resources is None or not hasattr(resources, "async_create_item"):
+                _LOGGER.warning(
+                    "navimow-card: Lovelace resource storage not available (YAML mode?). "
+                    "The card should work via add_extra_module_url."
+                )
+                return
+            existing_urls = {r.get("url", "") for r in resources.async_items()}
+            if url not in existing_urls:
+                await resources.async_create_item({"res_type": "module", "url": url})
+                _LOGGER.info("navimow-card: registered in Lovelace resources (%s)", url)
+            else:
+                _LOGGER.debug("navimow-card: already in Lovelace resources")
+        except Exception as err:
+            _LOGGER.warning(
+                "navimow-card: Lovelace resource registration failed: %s. "
+                "Add manually: Einstellungen → Dashboards → Ressourcen → %s (JavaScript-Modul)",
+                err, url,
+            )
+
+    if hass.is_running:
+        # Integration reload — HA already running, Lovelace data available now.
+        await _add_to_lovelace_storage()
+    else:
+        # Normal startup — defer until HA is fully started.
+        hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, _add_to_lovelace_storage)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
