@@ -203,6 +203,19 @@ class NavimowCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.hass.loop.call_soon_threadsafe(self._update_from_attributes, attrs)
 
     def _update_from_state(self, state: DeviceStateMessage) -> None:
+        # Retain last-known optional fields if the new MQTT message omits them.
+        # The SDK doesn't include position / metrics in every message type
+        # (e.g. the "docked" notification has neither); overwriting with None
+        # would cause the Lovelace card to lose those values immediately.
+        if self._last_state is not None:
+            for field in ("position", "metrics", "battery"):
+                incoming = getattr(state, field, None)
+                previous = getattr(self._last_state, field, None)
+                if incoming is None and previous is not None:
+                    try:
+                        object.__setattr__(state, field, previous)
+                    except (AttributeError, TypeError):
+                        pass  # frozen / immutable model – silently skip
         self._last_state = state
         self._last_data_source = "mqtt_push"
         self.async_set_updated_data(self._build_data())

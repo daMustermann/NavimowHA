@@ -84,6 +84,14 @@ class NavimowLawnMower(CoordinatorEntity[NavimowCoordinator], LawnMowerEntity):
             serial_number=device_info.serial_number or self._device_id,
         )
 
+        # Cache for fields that the SDK omits in certain states (e.g. position
+        # and metrics are not sent when the mower docks).  We retain the last
+        # known values so the Lovelace card can keep displaying session stats
+        # after the mower returns to base.
+        self._last_known_battery: int | None = None
+        self._last_known_position: dict | None = None
+        self._last_known_metrics: dict | None = None
+
     @property
     def available(self) -> bool:
         """Keep entity available as long as cached state exists.
@@ -109,23 +117,42 @@ class NavimowLawnMower(CoordinatorEntity[NavimowCoordinator], LawnMowerEntity):
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
-        """Return extra state attributes."""
+        """Return extra state attributes.
+
+        Position and metrics are only included in MQTT state messages while the
+        mower is active.  When it docks, the SDK sends a new state without
+        those fields, which would normally clear them.  We cache the last
+        known values so the card keeps showing the session summary after mowing.
+        """
         state: DeviceStateMessage | None = self.coordinator.get_device_state()
         attrs = self.coordinator.get_device_attributes()
         if not state:
             return {}
+
+        # Update the per-instance cache whenever fresh data arrives.
+        if state.battery is not None:
+            self._last_known_battery = state.battery
+        if state.position:
+            self._last_known_position = state.position
+        if state.metrics:
+            self._last_known_metrics = state.metrics
+
+        battery   = state.battery   if state.battery   is not None else self._last_known_battery
+        position  = state.position  or self._last_known_position
+        metrics   = state.metrics   or self._last_known_metrics
+
         attributes: dict[str, Any] = {
-            "battery": state.battery,
+            "battery": battery,
             "status": state.state,
         }
         if state.signal_strength is not None:
             attributes["signal_strength"] = state.signal_strength
-        if state.position:
-            attributes["position"] = state.position
+        if position:
+            attributes["position"] = position
         if state.error:
             attributes["error"] = state.error
-        if state.metrics:
-            attributes["metrics"] = state.metrics
+        if metrics:
+            attributes["metrics"] = metrics
         if attrs:
             attributes["attributes"] = attrs.attributes
         return attributes
