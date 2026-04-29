@@ -22,8 +22,6 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from mower_sdk.api import MowerAPI
-
 from .const import DOMAIN
 from .coordinator import NavimowCoordinator
 
@@ -66,7 +64,6 @@ async def async_setup_entry(
 ) -> None:
     """Set up Navimow number entities from a config entry."""
     data = hass.data[DOMAIN][config_entry.entry_id]
-    api: MowerAPI = data["api"]
     devices = data["devices"]
     coordinators: dict[str, NavimowCoordinator] = data["coordinators"]
 
@@ -76,7 +73,6 @@ async def async_setup_entry(
             entities.append(
                 NavimowNumber(
                     coordinator=coordinators[device.id],
-                    api=api,
                     entity_description=description,
                 )
             )
@@ -92,11 +88,9 @@ class NavimowNumber(CoordinatorEntity[NavimowCoordinator], NumberEntity):
     def __init__(
         self,
         coordinator: NavimowCoordinator,
-        api: MowerAPI,
         entity_description: NavimowNumberEntityDescription,
     ) -> None:
         super().__init__(coordinator)
-        self._api = api
         self.entity_description = entity_description
 
         device = coordinator.device
@@ -120,23 +114,19 @@ class NavimowNumber(CoordinatorEntity[NavimowCoordinator], NumberEntity):
         return self.entity_description.value_fn(self.coordinator)
 
     async def async_set_native_value(self, value: float) -> None:
-        """Push the new value to the mower via REST API."""
-        attr_key = self.entity_description.set_attr_key
-        if not attr_key:
-            _LOGGER.error("No attribute key defined for %s", self.entity_description.key)
-            return
-        await self.coordinator._async_ensure_valid_token()
+        """Push the new value to the mower via the SDK."""
+        sdk = self.coordinator.sdk
+        device_id = self.coordinator.device.id
         try:
-            await self._api.async_set_device_attribute(
-                self.coordinator.device.id, attr_key, int(value)
+            await self.hass.async_add_executor_job(
+                sdk.set_blade_height, device_id, int(value)
             )
             _LOGGER.info(
-                "Set %s to %s for device %s",
-                attr_key,
-                value,
-                self.coordinator.device.id,
+                "Set cutting height to %s mm for device %s",
+                int(value),
+                device_id,
             )
             await self.coordinator.async_request_refresh()
         except Exception as err:
-            _LOGGER.error("Failed to set %s to %s: %s", attr_key, value, err)
+            _LOGGER.error("Failed to set cutting height to %s mm: %s", int(value), err)
             raise

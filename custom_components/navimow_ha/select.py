@@ -10,8 +10,6 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from mower_sdk.api import MowerAPI
-
 from .const import DOMAIN
 from .coordinator import NavimowCoordinator
 
@@ -48,7 +46,6 @@ async def async_setup_entry(
 ) -> None:
     """Set up Navimow select entities from a config entry."""
     data = hass.data[DOMAIN][config_entry.entry_id]
-    api: MowerAPI = data["api"]
     devices = data["devices"]
     coordinators: dict[str, NavimowCoordinator] = data["coordinators"]
 
@@ -58,7 +55,6 @@ async def async_setup_entry(
             entities.append(
                 NavimowSelect(
                     coordinator=coordinators[device.id],
-                    api=api,
                     entity_description=description,
                 )
             )
@@ -74,11 +70,9 @@ class NavimowSelect(CoordinatorEntity[NavimowCoordinator], SelectEntity):
     def __init__(
         self,
         coordinator: NavimowCoordinator,
-        api: MowerAPI,
         entity_description: SelectEntityDescription,
     ) -> None:
         super().__init__(coordinator)
-        self._api = api
         self.entity_description = entity_description
 
         device = coordinator.device
@@ -118,15 +112,16 @@ class NavimowSelect(CoordinatorEntity[NavimowCoordinator], SelectEntity):
         except (ValueError, IndexError):
             _LOGGER.error("Invalid cutting height option: %s", option)
             return
-        await self.coordinator._async_ensure_valid_token()
+        sdk = self.coordinator.sdk
+        device_id = self.coordinator.device.id
         try:
-            await self._api.async_set_device_attribute(
-                self.coordinator.device.id, "bladeHeight", height_mm
+            await self.hass.async_add_executor_job(
+                sdk.set_blade_height, device_id, height_mm
             )
             _LOGGER.info(
                 "Cutting height set to %d mm for device %s",
                 height_mm,
-                self.coordinator.device.id,
+                device_id,
             )
             await self.coordinator.async_request_refresh()
         except Exception as err:

@@ -10,8 +10,9 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from mower_sdk.api import MowerAPI
-from mower_sdk.models import MowerCommand
+import uuid
+
+from mower_sdk.models import DeviceCommandMessage
 
 from .const import DOMAIN
 from .coordinator import NavimowCoordinator
@@ -39,7 +40,6 @@ async def async_setup_entry(
 ) -> None:
     """Set up Navimow button entities from a config entry."""
     data = hass.data[DOMAIN][config_entry.entry_id]
-    api: MowerAPI = data["api"]
     devices = data["devices"]
     coordinators: dict[str, NavimowCoordinator] = data["coordinators"]
 
@@ -49,7 +49,6 @@ async def async_setup_entry(
             entities.append(
                 NavimowButton(
                     coordinator=coordinators[device.id],
-                    api=api,
                     entity_description=description,
                 )
             )
@@ -65,11 +64,9 @@ class NavimowButton(CoordinatorEntity[NavimowCoordinator], ButtonEntity):
     def __init__(
         self,
         coordinator: NavimowCoordinator,
-        api: MowerAPI,
         entity_description: ButtonEntityDescription,
     ) -> None:
         super().__init__(coordinator)
-        self._api = api
         self.entity_description = entity_description
 
         device = coordinator.device
@@ -89,22 +86,20 @@ class NavimowButton(CoordinatorEntity[NavimowCoordinator], ButtonEntity):
 
     async def async_press(self) -> None:
         """Handle button press."""
+        sdk = self.coordinator.sdk
+        device_id = self.coordinator.device.id
         key = self.entity_description.key
-        command_map = {
-            "locate": MowerCommand.LOCATE,
-            "restart": MowerCommand.RESTART,
-        }
-        command = command_map.get(key)
-        if command is not None:
-            await self._send_command(command)
-
-    async def _send_command(self, command: MowerCommand) -> None:
-        await self.coordinator._async_ensure_valid_token()
+        command = DeviceCommandMessage(
+            id=f"cmd-{uuid.uuid4()}",
+            device_id=device_id,
+            command=key,
+            params={},
+        )
         try:
-            await self._api.async_send_command(self.coordinator.device.id, command)
-            _LOGGER.info("Button pressed: %s", self.entity_description.key)
+            await self.hass.async_add_executor_job(sdk._publish_command, command)
+            _LOGGER.info("Button pressed: %s for device %s", key, device_id)
         except Exception as err:
             _LOGGER.error(
-                "Failed to send command %s: %s", self.entity_description.key, err
+                "Failed to send command %s: %s", key, err
             )
             raise
