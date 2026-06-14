@@ -417,6 +417,13 @@ logger:
 
 - **Position coordinates are local, not GPS**: The X/Y values are in metres relative
   to the charging station. They cannot be used for accurate world-map positioning.
+- **Position/map may be empty on i10x models (e.g. i105)**: Position tracking, the
+  device tracker and the live map are only populated when the mower streams posture
+  (`postureX/Y/Theta`) in its real-time MQTT message. On the i10x line the
+  `realtimeDate/state` payload only contains `battery` + `state` and never reports
+  posture over MQTT (it appears only inside the official app, likely via a separate
+  real-time session / map endpoint). On these mowers the position entities stay
+  `unknown`.
 - **No offline / LAN operation**: All communication goes through the Navimow cloud.
 - **Single account instance**: Only one Navimow account can be linked at a time.
 
